@@ -42,16 +42,6 @@ class SwissmedicDiff
     rescue
       cell.to_s
     end
-    def data_diff(row, other)
-      flags = rows_diff(row, other)
-      package = @app.registration(cell(row, 0)).package(cell(row, 9))
-      flags.select { |flag|
-        origin = package.data_origin(flag)
-        origin ||= package.sequence.data_origin(flag)
-        origin ||= package.registration.data_origin(flag)
-        origin.nil? || origin == :swissmedic
-      }
-    end
     def describe(diff, iksnr)
       sprintf("%s: %s", iksnr, name(diff, iksnr))
     end
@@ -98,7 +88,7 @@ class SwissmedicDiff
           end
           known_seqs.delete([iksnr, seqnr])
           if(other = known_pacs.delete([iksnr, seqnr, pacnr]))
-            flags = latest ? rows_diff(row, other) : data_diff(row, other)
+            flags = rows_diff(row, other)
             (changes[iksnr].concat flags).uniq!
             updates.push row unless flags.empty?
           else
