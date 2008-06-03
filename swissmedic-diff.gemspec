@@ -3,7 +3,7 @@ require "rake"
 
 spec = Gem::Specification.new do |s|
    s.name        = "swissmedic-diff"
-   s.version     = "0.1.0"
+   s.version     = "0.1.1"
    s.summary     = "Find out what Products have changed on the swiss healthcare market"
    s.description = "Compares two Excel Documents provided by Swissmedic and displays the salient differences"
    s.author      = "Hannes Wyss"

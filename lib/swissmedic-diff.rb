@@ -74,20 +74,29 @@ class SwissmedicDiff
       @diff.changes = changes = {}
       @diff.newest_rows = newest_rows
       tbook = Spreadsheet::ParseExcel.parse(target)
+      idx, prr, prp = nil
       tbook.worksheet(0).each(3) { |row|
         group = cell(row, 4)
         if(group != 'TAM')
           iksnr = cell(row, 0)
           seqnr = "%02i" % cell(row, 1).to_i
           pacnr = cell(row, 9)
+          if prr == iksnr && prp == pacnr
+            idx += 1
+          else
+            prr = iksnr
+            prp = pacnr
+            idx = 0
+          end
+          row[15] = idx
           (newest_rows[iksnr] ||= {})[pacnr] = row
-          if(other = known_regs.delete(iksnr))
+          if(other = known_regs.delete([iksnr]))
             changes[iksnr] ||= []
           else
             changes[iksnr] ||= [:new]
           end
           known_seqs.delete([iksnr, seqnr])
-          if(other = known_pacs.delete([iksnr, seqnr, pacnr]))
+          if(other = known_pacs.delete([iksnr, pacnr, idx]))
             flags = rows_diff(row, other)
             (changes[iksnr].concat flags).uniq!
             updates.push row unless flags.empty?
@@ -100,16 +109,22 @@ class SwissmedicDiff
         end
       }
       @diff.replacements = reps = {}
-      known_pacs.each { |(iksnr, seqnr, pacnr), row|
-        key = [iksnr, "%02i" % cell(row, 1).to_i, cell(row, 10), cell(row, 11)]
+      known_pacs.each { |(iksnr, pacnr, idx), row|
+        key = [iksnr, '%02i' % cell(row, 1).to_i, cell(row, 10), cell(row, 11)]
         if(rep = replacements[key])
           changes[iksnr].push :replaced_package
           reps.store rep, pacnr
         end
       }
-      known_regs.each_key { |iksnr| changes[iksnr] = [:delete] }
+      known_regs.each_key { |(iksnr,_)| changes[iksnr] = [:delete] }
       changes.delete_if { |iksnr, flags| flags.empty? }
-      @diff.package_deletions = known_pacs.keys
+      @diff.package_deletions = known_pacs.collect { |key, row|
+        ## the keys in known_pacs don't include the sequence number (which
+        #  would prevent us from properly recognizing multi-sequence-Packages), 
+        #  so we need complete the path to the package now
+        key[1,0] = '%02i' % cell(row, 1).to_i
+        key
+      }
       @diff.sequence_deletions = known_seqs.keys
       @diff.registration_deletions = known_regs.keys
       @diff
@@ -130,15 +145,24 @@ class SwissmedicDiff
     end
     def _known_data(latest, known_regs, known_seqs, known_pacs, newest_rows)
       lbook = Spreadsheet::ParseExcel.parse(latest)
+      idx, prr, prp = nil
       lbook.worksheet(0).each(3) { |row| 
         group = cell(row, 4)
         if(group != 'TAM')
           iksnr = cell(row, 0)
           seqnr = "%02i" % cell(row, 1).to_i
           pacnr = cell(row, 9)
-          known_regs.store iksnr, row
+          if prr == iksnr && prp == pacnr
+            idx += 1
+          else
+            prr = iksnr
+            prp = pacnr
+            idx = 0
+          end
+          row[15] = idx
+          known_regs.store [iksnr], row
           known_seqs.store [iksnr, seqnr], row
-          known_pacs.store [iksnr, seqnr, pacnr], row
+          known_pacs.store [iksnr, pacnr, idx], row
           (newest_rows[iksnr] ||= {})[pacnr] = row
         end
       }

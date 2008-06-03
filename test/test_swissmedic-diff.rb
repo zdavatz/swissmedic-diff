@@ -37,7 +37,7 @@ module ODDB
       }
       assert_equal(expected, result.changes)
       assert_equal 3, result.package_deletions.size
-      assert_equal 3, result.package_deletions.first.size
+      assert_equal 4, result.package_deletions.first.size
       iksnrs = result.package_deletions.collect { |row| row.at(0) }.sort
       ikscds = result.package_deletions.collect { |row| row.at(2) }.sort
       assert_equal ['10368', '13689', '25144'], iksnrs
@@ -45,7 +45,7 @@ module ODDB
       assert_equal 1, result.sequence_deletions.size
       assert_equal ['10368', '01'], result.sequence_deletions.at(0)
       assert_equal 1, result.registration_deletions.size
-      assert_equal '10368', result.registration_deletions.at(0)
+      assert_equal ['10368'], result.registration_deletions.at(0)
       assert_equal 1, result.replacements.size
       assert_equal '031', result.replacements.values.first
     end
