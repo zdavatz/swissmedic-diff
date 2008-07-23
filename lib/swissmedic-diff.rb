@@ -65,7 +65,7 @@ class SwissmedicDiff
         sprintf "%s (%s)", txt, cell(row, COLUMNS.index(flag))
       end
     end
-    def diff(target, latest)
+    def diff(target, latest, ignore = [])
       replacements = {}
       known_regs, known_seqs, known_pacs, newest_rows = known_data(latest)
       @diff = OpenStruct.new
@@ -97,7 +97,7 @@ class SwissmedicDiff
           end
           known_seqs.delete([iksnr, seqnr])
           if(other = known_pacs.delete([iksnr, pacnr, idx]))
-            flags = rows_diff(row, other)
+            flags = rows_diff(row, other, ignore)
             (changes[iksnr].concat flags).uniq!
             updates.push row unless flags.empty?
           else
@@ -172,10 +172,11 @@ class SwissmedicDiff
       row = rows.sort.first.last
       cell(row, 2)
     end
-    def rows_diff(row, other)
+    def rows_diff(row, other, ignore = [])
       flags = []
       COLUMNS.each_with_index { |key, idx|
-        if(cell(row, idx) != cell(other, idx))
+        if(!ignore.include?(key) \
+           && cell(row, idx).to_s.downcase != cell(other, idx).to_s.downcase)
           flags.push key
         end
       }

@@ -21,10 +21,10 @@ module ODDB
     def test_diff
       result = @diff.diff(@data, @older)
       assert_equal 3, result.news.size
-      assert_equal 'Osanit, homöopathische Kügelchen', 
+      assert_equal 'Osanit, homöopathische Kügelchen',
                    result.news.first.at(2).to_s('latin1')
       assert_equal 7, result.updates.size
-      assert_equal 'Weleda Schnupfencrème, anthroposophisches Heilmittel', 
+      assert_equal 'Weleda Schnupfencrème, anthroposophisches Heilmittel',
                    result.updates.first.at(2).to_s('latin1')
       assert_equal 6, result.changes.size
       expected = {
@@ -33,6 +33,37 @@ module ODDB
         "10999" => [:new],
         "25144" => [:sequence, :replaced_package],
         "57678" => [:company, :index_therapeuticus, :expiry_date, :ikscat],
+        "57699" => [:new],
+      }
+      assert_equal(expected, result.changes)
+      assert_equal 3, result.package_deletions.size
+      assert_equal 4, result.package_deletions.first.size
+      iksnrs = result.package_deletions.collect { |row| row.at(0) }.sort
+      ikscds = result.package_deletions.collect { |row| row.at(2) }.sort
+      assert_equal ['10368', '13689', '25144'], iksnrs
+      assert_equal ['024', '031', '049'], ikscds
+      assert_equal 1, result.sequence_deletions.size
+      assert_equal ['10368', '01'], result.sequence_deletions.at(0)
+      assert_equal 1, result.registration_deletions.size
+      assert_equal ['10368'], result.registration_deletions.at(0)
+      assert_equal 1, result.replacements.size
+      assert_equal '031', result.replacements.values.first
+    end
+    def test_diff__ignore
+      ignore = [:company, :index_therapeuticus, :expiry_date, :ikscat]
+      result = @diff.diff(@data, @older, ignore)
+      assert_equal 3, result.news.size
+      assert_equal 'Osanit, homöopathische Kügelchen',
+                   result.news.first.at(2).to_s('latin1')
+      assert_equal 1, result.updates.size
+      assert_equal 'Weleda Schnupfencrème, anthroposophisches Heilmittel',
+                   result.updates.first.at(2).to_s('latin1')
+      assert_equal 5, result.changes.size
+      expected = {
+        "09232" => [:name_base],
+        "10368" => [:delete],
+        "10999" => [:new],
+        "25144" => [:sequence, :replaced_package],
         "57699" => [:new],
       }
       assert_equal(expected, result.changes)

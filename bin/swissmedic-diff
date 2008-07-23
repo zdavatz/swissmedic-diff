@@ -4,19 +4,23 @@ require 'swissmedic-diff'
 
 def usage
   puts <<-EOS
-Usage: #$0 [-gnr] <file1> <file2> [<output>]
+Usage: #$0 [-gnr] [-i ignorelist] <file1> <file2> [<output>]
 
 -g --group         sort by news, deletions and updates
 -n --name          sort by name
 -r --registration  sort by registration
+-i --ignore        ignore differences in the following comma-separated keys
   EOS
 end
 
 out = nil
 sort = :group
 
+ignore = []
 if(/^-/.match ARGV.first)
   sort = case ARGV.shift
+         when /^-{1,2}i/
+          ignore.concat ARGV.shift.split(',').collect { |key| key.to_sym }
          when /^-{1,2}n/
            :name
          when /^-{1,2}r/
@@ -37,5 +41,5 @@ else
 end
 
 plug = SwissmedicDiff.new
-diff = plug.diff(ARGV[1], ARGV[0])
+diff = plug.diff(ARGV[1], ARGV[0], ignore)
 out.puts plug.to_s(sort)
