@@ -6,25 +6,27 @@ require 'parseexcel'
 
 class SwissmedicDiff
   module Diff
-    COLUMNS = [ :iksnr, :seqnr, :name_base, :company, :product_group, 
+    COLUMNS = [ :iksnr, :seqnr, :name_base, :company, :product_group,
                 :index_therapeuticus, :production_science, :registration_date,
                 :expiry_date, :ikscd, :size, :unit, :ikscat, :substances,
-                :composition ]
+                :composition, :indication_registration, :indication_sequence ]
     FLAGS = {
-      :new                 =>  'Neues Produkt',
-      :name_base           =>  'Namensänderung', 
-      :ikscat              =>  'Abgabekategorie',
-      :index_therapeuticus =>  'Index Therapeuticus',
-      :company             =>  'Zulassungsinhaber',
-      :composition         =>  'Zusammensetzung', 
-      :sequence            =>  'Packungen', 
-      :size                =>  'Packungsgrösse',
-      :expiry_date         =>  'Ablaufdatum der Zulassung',
-      :registration_date   =>  'Erstzulassungsdatum',
-      :delete              =>  'Das Produkt wurde gelöscht',
-      :replaced_package    =>  'Packungs-Nummer',
-      :substances          =>  'Wirkstoffe',
-      :production_science  =>  'Heilmittelcode',
+      :new                      =>  'Neues Produkt',
+      :name_base                =>  'Namensänderung',
+      :ikscat                   =>  'Abgabekategorie',
+      :index_therapeuticus      =>  'Index Therapeuticus',
+      :indication_registration  =>  'Anwendungsgebiet Präparate',
+      :indication_sequence      =>  'Anwendungsgebiet Sequenz',
+      :company                  =>  'Zulassungsinhaber',
+      :composition              =>  'Zusammensetzung',
+      :sequence                 =>  'Packungen',
+      :size                     =>  'Packungsgrösse',
+      :expiry_date              =>  'Ablaufdatum der Zulassung',
+      :registration_date        =>  'Erstzulassungsdatum',
+      :delete                   =>  'Das Produkt wurde gelöscht',
+      :replaced_package         =>  'Packungs-Nummer',
+      :substances               =>  'Wirkstoffe',
+      :production_science       =>  'Heilmittelcode',
     }
     GALFORM_P = %r{excipiens\s+(ad|pro)\s+(?<galform>((?!\bpro\b)[^.])+)}
     def capitalize(string)
