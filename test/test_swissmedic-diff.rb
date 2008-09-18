@@ -32,7 +32,7 @@ module ODDB
         "10368" => [:delete],
         "10999" => [:new],
         "25144" => [:sequence, :replaced_package],
-        "57678" => [:company, :index_therapeuticus, :expiry_date, :ikscat],
+        "57678" => [:company, :index_therapeuticus, :atc_class, :expiry_date, :ikscat],
         "57699" => [:new],
       }
       assert_equal(expected, result.changes)
@@ -50,7 +50,7 @@ module ODDB
       assert_equal '031', result.replacements.values.first
     end
     def test_diff__ignore
-      ignore = [:company, :index_therapeuticus, :expiry_date, :ikscat]
+      ignore = [:company, :index_therapeuticus, :expiry_date, :ikscat, :atc_class]
       result = @diff.diff(@data, @older, ignore)
       assert_equal 3, result.news.size
       assert_equal 'Osanit, homöopathische Kügelchen',
@@ -91,11 +91,11 @@ module ODDB
 - 10368: Alcacyl, Tabletten
 > 09232: Weleda Schnupfencrème, anthroposophisches Heilmittel; Namensänderung (Weleda Schnupfencrème, anthroposophisches Heilmittel)
 > 25144: Panadol, Filmtabletten; Packungs-Nummer (031 -> 048)
-> 57678: Amlodipin-besyl-Mepha 5, Tabletten; Zulassungsinhaber (Vifor SA), Index Therapeuticus (07.10.5.), Ablaufdatum der Zulassung (10.05.2017), Abgabekategorie (A)
+> 57678: Amlodipin-besyl-Mepha 5, Tabletten; Zulassungsinhaber (Vifor SA), Index Therapeuticus (07.10.5.), ATC-Code (D11AF), Ablaufdatum der Zulassung (10.05.2017), Abgabekategorie (A)
       EOS
       assert_equal <<-EOS.strip, @diff.to_s(:name)
 - 10368: Alcacyl, Tabletten
-> 57678: Amlodipin-besyl-Mepha 5, Tabletten; Zulassungsinhaber (Vifor SA), Index Therapeuticus (07.10.5.), Ablaufdatum der Zulassung (10.05.2017), Abgabekategorie (A)
+> 57678: Amlodipin-besyl-Mepha 5, Tabletten; Zulassungsinhaber (Vifor SA), Index Therapeuticus (07.10.5.), ATC-Code (D11AF), Ablaufdatum der Zulassung (10.05.2017), Abgabekategorie (A)
 + 10999: Osanit, homöopathische Kügelchen
 > 25144: Panadol, Filmtabletten; Packungs-Nummer (031 -> 048)
 + 57699: Pyrazinamide Labatec, comprimés
@@ -106,7 +106,7 @@ module ODDB
 - 10368: Alcacyl, Tabletten
 + 10999: Osanit, homöopathische Kügelchen
 > 25144: Panadol, Filmtabletten; Packungs-Nummer (031 -> 048)
-> 57678: Amlodipin-besyl-Mepha 5, Tabletten; Zulassungsinhaber (Vifor SA), Index Therapeuticus (07.10.5.), Ablaufdatum der Zulassung (10.05.2017), Abgabekategorie (A)
+> 57678: Amlodipin-besyl-Mepha 5, Tabletten; Zulassungsinhaber (Vifor SA), Index Therapeuticus (07.10.5.), ATC-Code (D11AF), Ablaufdatum der Zulassung (10.05.2017), Abgabekategorie (A)
 + 57699: Pyrazinamide Labatec, comprimés
       EOS
     end

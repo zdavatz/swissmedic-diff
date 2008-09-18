@@ -7,9 +7,10 @@ require 'parseexcel'
 class SwissmedicDiff
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, :product_group,
-                :index_therapeuticus, :production_science, :registration_date,
-                :expiry_date, :ikscd, :size, :unit, :ikscat, :substances,
-                :composition, :indication_registration, :indication_sequence ]
+                :index_therapeuticus, :atc_class, :production_science,
+                :registration_date, :expiry_date, :ikscd, :size, :unit,
+                :ikscat, :substances, :composition, :indication_registration,
+                :indication_sequence ]
     FLAGS = {
       :new                      =>  'Neues Produkt',
       :name_base                =>  'Namensänderung',
@@ -27,6 +28,7 @@ class SwissmedicDiff
       :replaced_package         =>  'Packungs-Nummer',
       :substances               =>  'Wirkstoffe',
       :production_science       =>  'Heilmittelcode',
+      :atc_class                =>  'ATC-Code',
     }
     GALFORM_P = %r{excipiens\s+(ad|pro)\s+(?<galform>((?!\bpro\b)[^.])+)}
     def capitalize(string)
@@ -44,6 +46,9 @@ class SwissmedicDiff
     rescue
       cell.to_s
     end
+    def column(key)
+      COLUMNS.index(key)
+    end
     def describe(diff, iksnr)
       sprintf("%s: %s", iksnr, name(diff, iksnr))
     end
@@ -60,11 +65,10 @@ class SwissmedicDiff
         sprintf "%s (%s)", txt, pairs.join(',')
       when :registration_date, :expiry_date
         row = diff.newest_rows[iksnr].sort.first.last
-        sprintf "%s (%s)", txt, 
-                row.at(COLUMNS.index(flag)).date.strftime('%d.%m.%Y')
+        sprintf "%s (%s)", txt, row.at(column(flag)).date.strftime('%d.%m.%Y')
       else
         row = diff.newest_rows[iksnr].sort.first.last
-        sprintf "%s (%s)", txt, cell(row, COLUMNS.index(flag))
+        sprintf "%s (%s)", txt, cell(row, column(flag))
       end
     end
     def diff(target, latest, ignore = [])
@@ -78,11 +82,11 @@ class SwissmedicDiff
       tbook = Spreadsheet::ParseExcel.parse(target)
       idx, prr, prp = nil
       tbook.worksheet(0).each(3) { |row|
-        group = cell(row, 4)
+        group = cell(row, column(:product_group))
         if(group != 'TAM')
-          iksnr = cell(row, 0)
-          seqnr = "%02i" % cell(row, 1).to_i
-          pacnr = cell(row, 9)
+          iksnr = cell(row, column(:iksnr))
+          seqnr = "%02i" % cell(row, column(:seqnr)).to_i
+          pacnr = cell(row, column(:ikscd))
           if prr == iksnr && prp == pacnr
             idx += 1
           else
@@ -90,7 +94,7 @@ class SwissmedicDiff
             prp = pacnr
             idx = 0
           end
-          row[15] = idx
+          row[COLUMNS.size] = idx
           (newest_rows[iksnr] ||= {})[pacnr] = row
           if(other = known_regs.delete([iksnr]))
             changes[iksnr] ||= []
@@ -103,7 +107,8 @@ class SwissmedicDiff
             (changes[iksnr].concat flags).uniq!
             updates.push row unless flags.empty?
           else
-            replacements.store [iksnr, seqnr, cell(row, 10), cell(row, 11)], row
+            replacements.store [ iksnr, seqnr, cell(row, column(:size)), 
+                                 cell(row, column(:unit)) ], row
             flags = changes[iksnr]
             flags.push(:sequence).uniq! unless(flags.include? :new)
             news.push row
@@ -112,7 +117,8 @@ class SwissmedicDiff
       }
       @diff.replacements = reps = {}
       known_pacs.each { |(iksnr, pacnr, idx), row|
-        key = [iksnr, '%02i' % cell(row, 1).to_i, cell(row, 10), cell(row, 11)]
+        key = [iksnr, '%02i' % cell(row, column(:seqnr)).to_i, 
+                      cell(row, column(:size)), cell(row, column(:unit))]
         if(rep = replacements[key])
           changes[iksnr].push :replaced_package
           reps.store rep, pacnr
@@ -124,7 +130,7 @@ class SwissmedicDiff
         ## the keys in known_pacs don't include the sequence number (which
         #  would prevent us from properly recognizing multi-sequence-Packages), 
         #  so we need complete the path to the package now
-        key[1,0] = '%02i' % cell(row, 1).to_i
+        key[1,0] = '%02i' % cell(row, column(:seqnr)).to_i
         key
       }
       @diff.sequence_deletions = known_seqs.keys
@@ -149,11 +155,11 @@ class SwissmedicDiff
       lbook = Spreadsheet::ParseExcel.parse(latest)
       idx, prr, prp = nil
       lbook.worksheet(0).each(3) { |row| 
-        group = cell(row, 4)
+        group = cell(row, column(:product_group))
         if(group != 'TAM')
-          iksnr = cell(row, 0)
-          seqnr = "%02i" % cell(row, 1).to_i
-          pacnr = cell(row, 9)
+          iksnr = cell(row, column(:iksnr))
+          seqnr = "%02i" % cell(row, column(:seqnr)).to_i
+          pacnr = cell(row, column(:ikscd))
           if prr == iksnr && prp == pacnr
             idx += 1
           else
@@ -161,7 +167,7 @@ class SwissmedicDiff
             prp = pacnr
             idx = 0
           end
-          row[15] = idx
+          row[COLUMNS.size] = idx
           known_regs.store [iksnr], row
           known_seqs.store [iksnr, seqnr], row
           known_pacs.store [iksnr, pacnr, idx], row
@@ -172,7 +178,7 @@ class SwissmedicDiff
     def name(diff, iksnr)
       rows = diff.newest_rows[iksnr]
       row = rows.sort.first.last
-      cell(row, 2)
+      cell(row, column(:name_base))
     end
     def rows_diff(row, other, ignore = [])
       flags = []
