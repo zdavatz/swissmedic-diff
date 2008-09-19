@@ -80,6 +80,10 @@ class SwissmedicDiff
       @diff.changes = changes = {}
       @diff.newest_rows = newest_rows
       tbook = Spreadsheet::ParseExcel.parse(target)
+      sheet = tbook.worksheet(0)
+      if new_colum = cell(sheet.row(2), COLUMNS.size)
+        raise "New column #{COLUMNS.size} (#{new_column})"
+      end
       idx, prr, prp = nil
       tbook.worksheet(0).each(3) { |row|
         group = cell(row, column(:product_group))
@@ -184,7 +188,7 @@ class SwissmedicDiff
       flags = []
       COLUMNS.each_with_index { |key, idx|
         if(!ignore.include?(key) \
-           && cell(row, idx).to_s.downcase != cell(other, idx).to_s.downcase)
+           && _comparable(key, row, idx) != _comparable(key, other, idx))
           flags.push key
         end
       }
@@ -221,6 +225,18 @@ class SwissmedicDiff
                    2
                  end
         [weight, iksnr]
+      end
+    end
+    def _comparable(key, row, idx)
+      if cell = row.at(idx)
+          case key
+          when :registration_date, :expiry_date
+            cell.date
+          when :seqnr
+            sprintf "%02i", cell.to_i
+          else
+            cell(row, idx).downcase.gsub(/\s+/, "")
+          end
       end
     end
   end
