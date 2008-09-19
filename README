@@ -1,31 +1,47 @@
-SwissmedicDiff - Find out what Products have changed on the swiss healthcare market
-============
+SwissmedicDiff 
+==============
 Version: 0.1.0
-Date: 2008-03-27
+Date: 2008-08-12
 
-Short Description:
-Compares two Excel Documents provided by Swissmedic and displays the salient differences
+Short Description
+------------------
 
+Compares two Excel Documents provided by Swissmedic and displays the
+salient differences. Also: Find out what Products have changed on the
+swiss healthcare market.
+
+Get your files here:
+
+	* http://www.swissmedic.ch/html/content/Listen-d.html
+
+Up-To-Date file:
+
+	* http://www.swissmedic.ch/files/pdf/Packungen.xls
+
+Note
+----
+
+Swissmedic does not store old files. You must do this on your own.
 
 Requirements
 ------------
 
-  * ruby 1.8
-  * parseexcel
+	* ruby 1.8
+	* parseexcel
 	
 Install
 -------
 
 The easiest way to install is via RubyGems. On the command line enter:
 
-  > gem install swissmedic-diff
+	> gem install swissmedic-diff
 
-To manually install, unpack the archive and use the included setup.rb script.
-For example:
+To manually install, unpack the archive and use the included setup.rb
+script. For example:
 
-  > tar -xvzf swissmedic-diff.tbz
-  > cd swissmedic-diff
-  > sudo ruby setup.rb
+	> tar -xvzf swissmedic-diff.tbz
+	> cd swissmedic-diff
+	> sudo ruby setup.rb
 
 
 Usage
@@ -33,15 +49,23 @@ Usage
 
 Usage: /usr/bin/swissmedic-diff [-gnr] <file1> <file2> [<output>]
 
--g --group         sort by news, deletions and updates
--n --name          sort by name
--r --registration  sort by registration
+	-g --group         sort by news, deletions and updates
+	-n --name          sort by name
+	-r --registration  sort by registration
 
 
 License
 -------
 
-	LGPL
-
+	* LGPL
+	* http://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License
 	
-Author: Hannes Wyss <hwyss@ywesee.com>
+Author
+------
+
+	* Hannes Wyss <hwyss@ywesee.com>
+
+Author README
+-------------
+	
+	* Zeno R.R. Davatz <zdavatz@ywesee.com>
