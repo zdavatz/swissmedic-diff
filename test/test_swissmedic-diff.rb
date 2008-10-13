@@ -16,16 +16,16 @@ module ODDB
                                File.dirname(__FILE__)
       @older = File.expand_path 'data/Packungen.older.xls',
                                 File.dirname(__FILE__)
-      @workbook = Spreadsheet::ParseExcel.parse(@data)
+      @workbook = Spreadsheet.open(@data)
     end
     def test_diff
       result = @diff.diff(@data, @older)
       assert_equal 3, result.news.size
       assert_equal 'Osanit, homöopathische Kügelchen',
-                   result.news.first.at(2).to_s('latin1')
+                   result.news.first.at(2)
       assert_equal 7, result.updates.size
       assert_equal 'Weleda Schnupfencrème, anthroposophisches Heilmittel',
-                   result.updates.first.at(2).to_s('latin1')
+                   result.updates.first.at(2)
       assert_equal 6, result.changes.size
       expected = {
         "09232" => [:name_base],
@@ -54,10 +54,10 @@ module ODDB
       result = @diff.diff(@data, @older, ignore)
       assert_equal 3, result.news.size
       assert_equal 'Osanit, homöopathische Kügelchen',
-                   result.news.first.at(2).to_s('latin1')
+                   result.news.first.at(2)
       assert_equal 1, result.updates.size
       assert_equal 'Weleda Schnupfencrème, anthroposophisches Heilmittel',
-                   result.updates.first.at(2).to_s('latin1')
+                   result.updates.first.at(2)
       assert_equal 5, result.changes.size
       expected = {
         "09232" => [:name_base],

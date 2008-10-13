@@ -2,9 +2,10 @@
 # SwissmedicDiff -- swissmedic-diff -- 27.03.2008 -- hwyss@ywesee.com
 
 require 'ostruct'
-require 'parseexcel'
+require 'spreadsheet'
 
 class SwissmedicDiff
+  Spreadsheet.client_encoding = 'LATIN1//TRANSLIT//IGNORE'
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, :product_group,
                 :index_therapeuticus, :atc_class, :production_science,
@@ -36,12 +37,7 @@ class SwissmedicDiff
     end
     def cell(row, pos)
       if(cell = row.at(pos))
-        case cell
-        when String
-          cell
-        else
-          cell.to_s('latin1')
-        end
+        cell.to_s
       end
     rescue
       cell.to_s
@@ -65,7 +61,7 @@ class SwissmedicDiff
         sprintf "%s (%s)", txt, pairs.join(',')
       when :registration_date, :expiry_date
         row = diff.newest_rows[iksnr].sort.first.last
-        sprintf "%s (%s)", txt, row.at(column(flag)).date.strftime('%d.%m.%Y')
+        sprintf "%s (%s)", txt, row.date(column(flag)).strftime('%d.%m.%Y')
       else
         row = diff.newest_rows[iksnr].sort.first.last
         sprintf "%s (%s)", txt, cell(row, column(flag))
@@ -79,7 +75,7 @@ class SwissmedicDiff
       @diff.updates = updates = []
       @diff.changes = changes = {}
       @diff.newest_rows = newest_rows
-      tbook = Spreadsheet::ParseExcel.parse(target)
+      tbook = Spreadsheet.open(target)
       sheet = tbook.worksheet(0)
       if new_colum = cell(sheet.row(2), COLUMNS.size)
         raise "New column #{COLUMNS.size} (#{new_column})"
@@ -156,7 +152,7 @@ class SwissmedicDiff
       [known_regs, known_seqs, known_pacs, newest_rows]
     end
     def _known_data(latest, known_regs, known_seqs, known_pacs, newest_rows)
-      lbook = Spreadsheet::ParseExcel.parse(latest)
+      lbook = Spreadsheet.open(latest)
       idx, prr, prp = nil
       lbook.worksheet(0).each(3) { |row| 
         group = cell(row, column(:product_group))
@@ -229,14 +225,14 @@ class SwissmedicDiff
     end
     def _comparable(key, row, idx)
       if cell = row.at(idx)
-          case key
-          when :registration_date, :expiry_date
-            cell.date
-          when :seqnr
-            sprintf "%02i", cell.to_i
-          else
-            cell(row, idx).downcase.gsub(/\s+/, "")
-          end
+        case key
+        when :registration_date, :expiry_date
+          row.date idx
+        when :seqnr
+          sprintf "%02i", cell.to_i
+        else
+          cell(row, idx).downcase.gsub(/\s+/, "")
+        end
       end
     end
   end
