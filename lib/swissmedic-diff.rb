@@ -36,11 +36,9 @@ class SwissmedicDiff
       string.split(/\s+/).collect { |word| word.capitalize }.join(' ')
     end
     def cell(row, pos)
-      if(cell = row.at(pos))
+      if(cell = row[pos])
         cell.to_s
       end
-    rescue
-      cell.to_s
     end
     def column(key)
       COLUMNS.index(key)
@@ -81,14 +79,20 @@ class SwissmedicDiff
         raise "New column #{COLUMNS.size} (#{new_column})"
       end
       idx, prr, prp = nil
+      multiples = {}
       tbook.worksheet(0).each(3) { |row|
         group = cell(row, column(:product_group))
         if(group != 'TAM')
           iksnr = cell(row, column(:iksnr))
           seqnr = "%02i" % cell(row, column(:seqnr)).to_i
           pacnr = cell(row, column(:ikscd))
+          (multiples[iksnr] ||= {})
           if prr == iksnr && prp == pacnr
             idx += 1
+          elsif previous = multiples[iksnr][pacnr]
+            prr = iksnr
+            prp = pacnr
+            idx = previous[COLUMNS.size].to_i + 1
           else
             prr = iksnr
             prp = pacnr
@@ -96,6 +100,7 @@ class SwissmedicDiff
           end
           row[COLUMNS.size] = idx
           (newest_rows[iksnr] ||= {})[pacnr] = row
+          multiples[iksnr][pacnr] = row
           if(other = known_regs.delete([iksnr]))
             changes[iksnr] ||= []
           else
@@ -154,19 +159,26 @@ class SwissmedicDiff
     def _known_data(latest, known_regs, known_seqs, known_pacs, newest_rows)
       lbook = Spreadsheet.open(latest)
       idx, prr, prp = nil
+      multiples = {}
       lbook.worksheet(0).each(3) { |row| 
         group = cell(row, column(:product_group))
         if(group != 'TAM')
           iksnr = cell(row, column(:iksnr))
           seqnr = "%02i" % cell(row, column(:seqnr)).to_i
           pacnr = cell(row, column(:ikscd))
+          multiples[iksnr] ||= {}
           if prr == iksnr && prp == pacnr
             idx += 1
+          elsif previous = multiples[iksnr][pacnr]
+            prr = iksnr
+            prp = pacnr
+            idx = previous[COLUMNS.size].to_i + 1
           else
             prr = iksnr
             prp = pacnr
             idx = 0
           end
+          multiples[iksnr][pacnr] = row
           row[COLUMNS.size] = idx
           known_regs.store [iksnr], row
           known_seqs.store [iksnr, seqnr], row
@@ -224,7 +236,7 @@ class SwissmedicDiff
       end
     end
     def _comparable(key, row, idx)
-      if cell = row.at(idx)
+      if cell = row[idx]
         case key
         when :registration_date, :expiry_date
           row.date idx
