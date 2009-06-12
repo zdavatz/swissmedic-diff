@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 # SwissmedicDiff -- swissmedic-diff -- 27.03.2008 -- hwyss@ywesee.com
 
 require 'ostruct'
 require 'spreadsheet'
 
 class SwissmedicDiff
-  Spreadsheet.client_encoding = 'LATIN1//TRANSLIT//IGNORE'
+  Spreadsheet.client_encoding = 'UTF-8'
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, :product_group,
                 :index_therapeuticus, :atc_class, :production_science,
@@ -14,18 +15,18 @@ class SwissmedicDiff
                 :indication_sequence ]
     FLAGS = {
       :new                      =>  'Neues Produkt',
-      :name_base                =>  'Namensänderung',
+      :name_base                =>  'NamensÃ¤nderung',
       :ikscat                   =>  'Abgabekategorie',
       :index_therapeuticus      =>  'Index Therapeuticus',
-      :indication_registration  =>  'Anwendungsgebiet Präparate',
+      :indication_registration  =>  'Anwendungsgebiet PrÃ¤parate',
       :indication_sequence      =>  'Anwendungsgebiet Sequenz',
       :company                  =>  'Zulassungsinhaber',
       :composition              =>  'Zusammensetzung',
       :sequence                 =>  'Packungen',
-      :size                     =>  'Packungsgrösse',
+      :size                     =>  'PackungsgrÃ¶sse',
       :expiry_date              =>  'Ablaufdatum der Zulassung',
       :registration_date        =>  'Erstzulassungsdatum',
-      :delete                   =>  'Das Produkt wurde gelöscht',
+      :delete                   =>  'Das Produkt wurde gelÃ¶scht',
       :replaced_package         =>  'Packungs-Nummer',
       :substances               =>  'Wirkstoffe',
       :production_science       =>  'Heilmittelcode',
@@ -59,7 +60,7 @@ class SwissmedicDiff
         sprintf "%s (%s)", txt, pairs.join(',')
       when :registration_date, :expiry_date
         row = diff.newest_rows[iksnr].sort.first.last
-        sprintf "%s (%s)", txt, row.date(column(flag)).strftime('%d.%m.%Y')
+        sprintf "%s (%s)", txt, row[column(flag)].strftime('%d.%m.%Y')
       else
         row = diff.newest_rows[iksnr].sort.first.last
         sprintf "%s (%s)", txt, cell(row, column(flag))
@@ -239,7 +240,7 @@ class SwissmedicDiff
       if cell = row[idx]
         case key
         when :registration_date, :expiry_date
-          row.date idx
+          row[idx]
         when :seqnr
           sprintf "%02i", cell.to_i
         else
