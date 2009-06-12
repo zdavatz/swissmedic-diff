@@ -76,7 +76,7 @@ class SwissmedicDiff
       @diff.newest_rows = newest_rows
       tbook = Spreadsheet.open(target)
       sheet = tbook.worksheet(0)
-      if new_colum = cell(sheet.row(2), COLUMNS.size)
+      if new_column = cell(sheet.row(2), COLUMNS.size)
         raise "New column #{COLUMNS.size} (#{new_column})"
       end
       idx, prr, prp = nil
