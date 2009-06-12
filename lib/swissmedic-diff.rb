@@ -6,13 +6,12 @@ require 'ostruct'
 require 'spreadsheet'
 
 class SwissmedicDiff
-  Spreadsheet.client_encoding = 'UTF-8'
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, :product_group,
                 :index_therapeuticus, :atc_class, :production_science,
-                :registration_date, :expiry_date, :ikscd, :size, :unit,
-                :ikscat, :substances, :composition, :indication_registration,
-                :indication_sequence ]
+                :registration_date, :sequence_date, :expiry_date, :ikscd,
+                :size, :unit, :ikscat, :substances, :composition,
+                :indication_registration, :indication_sequence ]
     FLAGS = {
       :new                      =>  'Neues Produkt',
       :name_base                =>  'Namensänderung',
@@ -26,6 +25,7 @@ class SwissmedicDiff
       :size                     =>  'Packungsgrösse',
       :expiry_date              =>  'Ablaufdatum der Zulassung',
       :registration_date        =>  'Erstzulassungsdatum',
+      :sequence_date            =>  'Zulassungsdatum Sequenz',
       :delete                   =>  'Das Produkt wurde gelöscht',
       :replaced_package         =>  'Packungs-Nummer',
       :substances               =>  'Wirkstoffe',
@@ -74,6 +74,7 @@ class SwissmedicDiff
       @diff.updates = updates = []
       @diff.changes = changes = {}
       @diff.newest_rows = newest_rows
+      Spreadsheet.client_encoding = 'UTF-8'
       tbook = Spreadsheet.open(target)
       sheet = tbook.worksheet(0)
       if new_column = cell(sheet.row(2), COLUMNS.size)
