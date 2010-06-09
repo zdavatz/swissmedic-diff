@@ -1,6 +1,6 @@
 SwissmedicDiff 
 ==============
-Version: 0.1.0
+Version: 0.1.1
 Date: 2008-08-12
 
 Short Description
@@ -34,7 +34,8 @@ Install
 
 The easiest way to install is via RubyGems. On the command line enter:
 
-	> gem install swissmedic-diff
+	> gem build swissmedic-diff.gemspec
+	> gem install swissmedic-diff-0.1.1.gem
 
 To manually install, unpack the archive and use the included setup.rb
 script. For example:
