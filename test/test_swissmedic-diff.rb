@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
 # SwissmedicPluginTest -- oddb.org -- 18.03.2008 -- hwyss@ywesee.com
 
 $: << File.expand_path("../lib", File.dirname(__FILE__))
