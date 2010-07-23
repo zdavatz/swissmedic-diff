@@ -44,6 +44,11 @@ script. For example:
 	> cd swissmedic-diff
 	> sudo ruby setup.rb
 
+See test directory for tests. Run
+
+	ruby test_swissmedic-diff.rb
+
+for testing.
 
 Usage
 -----
