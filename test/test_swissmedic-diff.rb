@@ -21,64 +21,64 @@ module ODDB
     def test_diff
       result = @diff.diff(@data, @older)
       assert_equal 3, result.news.size
-      assert_equal 'Osanit, homöopathische Kügelchen',
+      assert_equal 'Cardio-Pulmo-RÃ©nal SÃ©rocytol, suppositoire',
                    result.news.first.at(2)
-      assert_equal 7, result.updates.size
-      assert_equal 'Weleda Schnupfencrème, anthroposophisches Heilmittel',
+      assert_equal 2, result.updates.size
+      assert_equal 'Coeur-Vaisseaux SÃ©rocytol, suppositoire(update)',
                    result.updates.first.at(2)
       assert_equal 6, result.changes.size
       expected = {
-        "09232" => [:name_base],
-        "10368" => [:delete],
-        "10999" => [:new],
-        "25144" => [:sequence, :replaced_package],
-        "57678" => [:company, :index_therapeuticus, :atc_class, :expiry_date, :ikscat],
-        "57699" => [:new],
+        "00275"=>[:new],
+        "00277"=>[:name_base],
+        "61338"=>[:company, :atc_class],
+        "61367"=>[:sequence, :replaced_package],
+        "61416"=>[:new],
+        "00274"=>[:delete]
       }
       assert_equal(expected, result.changes)
       assert_equal 3, result.package_deletions.size
       assert_equal 4, result.package_deletions.first.size
       iksnrs = result.package_deletions.collect { |row| row.at(0) }.sort
       ikscds = result.package_deletions.collect { |row| row.at(2) }.sort
-      assert_equal ['10368', '13689', '25144'], iksnrs
-      assert_equal ['024', '031', '049'], ikscds
+      assert_equal ["00274", "61367", "61367"], iksnrs
+      assert_equal ["001", "002", "005"], ikscds
       assert_equal 1, result.sequence_deletions.size
-      assert_equal ['10368', '01'], result.sequence_deletions.at(0)
+      assert_equal ["00274", "01"], result.sequence_deletions.at(0)
       assert_equal 1, result.registration_deletions.size
-      assert_equal ['10368'], result.registration_deletions.at(0)
+      assert_equal ["00274"], result.registration_deletions.at(0)
       assert_equal 1, result.replacements.size
-      assert_equal '031', result.replacements.values.first
+      assert_equal '005', result.replacements.values.first
     end
     def test_diff__ignore
-      ignore = [:company, :index_therapeuticus, :expiry_date, :ikscat, :atc_class]
+      ignore = [:company, :atc_class]
       result = @diff.diff(@data, @older, ignore)
       assert_equal 3, result.news.size
-      assert_equal 'Osanit, homöopathische Kügelchen',
+      assert_equal 'Cardio-Pulmo-RÃ©nal SÃ©rocytol, suppositoire',
                    result.news.first.at(2)
       assert_equal 1, result.updates.size
-      assert_equal 'Weleda Schnupfencrème, anthroposophisches Heilmittel',
+      assert_equal 'Coeur-Vaisseaux SÃ©rocytol, suppositoire(update)',
                    result.updates.first.at(2)
       assert_equal 5, result.changes.size
       expected = {
-        "09232" => [:name_base],
-        "10368" => [:delete],
-        "10999" => [:new],
-        "25144" => [:sequence, :replaced_package],
-        "57699" => [:new],
+        "00275"=>[:new],
+        "00277"=>[:name_base],
+        "61367"=>[:sequence, :replaced_package],
+        "61416"=>[:new],
+        "00274"=>[:delete]
       }
       assert_equal(expected, result.changes)
       assert_equal 3, result.package_deletions.size
       assert_equal 4, result.package_deletions.first.size
       iksnrs = result.package_deletions.collect { |row| row.at(0) }.sort
       ikscds = result.package_deletions.collect { |row| row.at(2) }.sort
-      assert_equal ['10368', '13689', '25144'], iksnrs
-      assert_equal ['024', '031', '049'], ikscds
+      assert_equal ["00274", "61367", "61367"], iksnrs
+      assert_equal ["001", "002", "005"], ikscds
       assert_equal 1, result.sequence_deletions.size
-      assert_equal ['10368', '01'], result.sequence_deletions.at(0)
+      assert_equal ["00274", "01"], result.sequence_deletions.at(0)
       assert_equal 1, result.registration_deletions.size
-      assert_equal ['10368'], result.registration_deletions.at(0)
+      assert_equal ["00274"], result.registration_deletions.at(0)
       assert_equal 1, result.replacements.size
-      assert_equal '031', result.replacements.values.first
+      assert_equal '005', result.replacements.values.first
     end
     def test_to_s
       assert_nothing_raised {
@@ -86,28 +86,28 @@ module ODDB
       }
       result = @diff.diff(@data, @older)
       assert_equal <<-EOS.strip, @diff.to_s
-+ 10999: Osanit, homöopathische Kügelchen
-+ 57699: Pyrazinamide Labatec, comprimés
-- 10368: Alcacyl, Tabletten
-> 09232: Weleda Schnupfencrème, anthroposophisches Heilmittel; Namensänderung (Weleda Schnupfencrème, anthroposophisches Heilmittel)
-> 25144: Panadol, Filmtabletten; Packungs-Nummer (031 -> 048)
-> 57678: Amlodipin-besyl-Mepha 5, Tabletten; Zulassungsinhaber (Vifor SA), Index Therapeuticus (07.10.5.), ATC-Code (D11AF), Ablaufdatum der Zulassung (10.05.2017), Abgabekategorie (A)
++ 00275: Cardio-Pulmo-RÃ©nal SÃ©rocytol, suppositoire
++ 61416: Otriduo Schnupfen, Nasentropfen
+- 00274: Cardio-Pulmo-RÃ©nal SÃ©rocytol, suppositoire
+> 00277: Coeur-Vaisseaux SÃ©rocytol, suppositoire; NamensÃ¤nderung (Coeur-Vaisseaux SÃ©rocytol, suppositoire)
+> 61338: Cefuroxim Fresenius i.v. 750 mg, Pulver zur Herstellung einer i.v. LÃ¶sung; Zulassungsinhaber (Fresenius Kabi (Schweiz) AG), ATC-Code (J01DC02)
+> 61367: Hypericum-Mepha 250, Lactab; Packungs-Nummer (005 -> 006)
       EOS
       assert_equal <<-EOS.strip, @diff.to_s(:name)
-- 10368: Alcacyl, Tabletten
-> 57678: Amlodipin-besyl-Mepha 5, Tabletten; Zulassungsinhaber (Vifor SA), Index Therapeuticus (07.10.5.), ATC-Code (D11AF), Ablaufdatum der Zulassung (10.05.2017), Abgabekategorie (A)
-+ 10999: Osanit, homöopathische Kügelchen
-> 25144: Panadol, Filmtabletten; Packungs-Nummer (031 -> 048)
-+ 57699: Pyrazinamide Labatec, comprimés
-> 09232: Weleda Schnupfencrème, anthroposophisches Heilmittel; Namensänderung (Weleda Schnupfencrème, anthroposophisches Heilmittel)
+- 00274: Cardio-Pulmo-RÃ©nal SÃ©rocytol, suppositoire
++ 00275: Cardio-Pulmo-RÃ©nal SÃ©rocytol, suppositoire
+> 61338: Cefuroxim Fresenius i.v. 750 mg, Pulver zur Herstellung einer i.v. LÃ¶sung; Zulassungsinhaber (Fresenius Kabi (Schweiz) AG), ATC-Code (J01DC02)
+> 00277: Coeur-Vaisseaux SÃ©rocytol, suppositoire; NamensÃ¤nderung (Coeur-Vaisseaux SÃ©rocytol, suppositoire)
+> 61367: Hypericum-Mepha 250, Lactab; Packungs-Nummer (005 -> 006)
++ 61416: Otriduo Schnupfen, Nasentropfen
       EOS
       assert_equal <<-EOS.strip, @diff.to_s(:registration)
-> 09232: Weleda Schnupfencrème, anthroposophisches Heilmittel; Namensänderung (Weleda Schnupfencrème, anthroposophisches Heilmittel)
-- 10368: Alcacyl, Tabletten
-+ 10999: Osanit, homöopathische Kügelchen
-> 25144: Panadol, Filmtabletten; Packungs-Nummer (031 -> 048)
-> 57678: Amlodipin-besyl-Mepha 5, Tabletten; Zulassungsinhaber (Vifor SA), Index Therapeuticus (07.10.5.), ATC-Code (D11AF), Ablaufdatum der Zulassung (10.05.2017), Abgabekategorie (A)
-+ 57699: Pyrazinamide Labatec, comprimés
+- 00274: Cardio-Pulmo-RÃ©nal SÃ©rocytol, suppositoire
++ 00275: Cardio-Pulmo-RÃ©nal SÃ©rocytol, suppositoire
+> 00277: Coeur-Vaisseaux SÃ©rocytol, suppositoire; NamensÃ¤nderung (Coeur-Vaisseaux SÃ©rocytol, suppositoire)
+> 61338: Cefuroxim Fresenius i.v. 750 mg, Pulver zur Herstellung einer i.v. LÃ¶sung; Zulassungsinhaber (Fresenius Kabi (Schweiz) AG), ATC-Code (J01DC02)
+> 61367: Hypericum-Mepha 250, Lactab; Packungs-Nummer (005 -> 006)
++ 61416: Otriduo Schnupfen, Nasentropfen
       EOS
     end
   end
