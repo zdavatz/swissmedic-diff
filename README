@@ -3,6 +3,10 @@ SwissmedicDiff
 Version: 0.1.1
 Date: 2008-08-12
 
+R-Doc
+-----
+* Check the Rdoc-Documenation for Swissmedic-Diff. Open doc/indexl.html in your local browser.
+
 Short Description
 ------------------
 
@@ -70,7 +74,7 @@ Author
 ------
 
 	* Hannes Wyss <hwyss@ywesee.com>
-  * Masaomi Hatakeyama <mhatakeyama@ywesee.com>
+  	* Masaomi Hatakeyama <mhatakeyama@ywesee.com>
 
 Author README
 -------------
