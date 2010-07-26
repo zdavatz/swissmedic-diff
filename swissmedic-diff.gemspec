@@ -9,12 +9,12 @@ spec = Gem::Specification.new do |s|
    s.author      = "Hannes Wyss, Masaomi Hatakeyama"
    s.email       = "hwyss@ywesee.com, mhatakeyama@ywesee.com"
    s.platform    = Gem::Platform::RUBY
-   s.autorequire = "swissmedic-diff"
    s.files       = FileList['lib/*.rb', 'bin/*', '[A-Z]*', 'test/*', 
                             'test/data/*.xls'].to_a
    s.test_file   = "test/test_swissmedic-diff.rb"
    s.executables << 'swissmedic-diff'
    s.add_dependency('parseexcel')
+   s.homepage	 = "http://scm.ywesee.com/swissmedic-diff/.git"
 end
 
 if $0 == __FILE__
