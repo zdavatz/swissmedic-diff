@@ -1,7 +1,7 @@
 SwissmedicDiff 
 ==============
-Version: 0.1.1
-Date: 2008-08-12
+Version: 0.1.2
+Date: 2010-07-26
 
 R-Doc
 -----
@@ -30,7 +30,7 @@ Swissmedic does not store old files. You must do this on your own.
 Requirements
 ------------
 
-	* ruby 1.8
+	* ruby 1.8 (with oniguruma patch) or ruby 1.9
 	* parseexcel
 	
 Install
@@ -74,9 +74,10 @@ Author
 ------
 
 	* Hannes Wyss <hwyss@ywesee.com>
-  	* Masaomi Hatakeyama <mhatakeyama@ywesee.com>
+  * Masaomi Hatakeyama <mhatakeyama@ywesee.com>
 
 Author README
 -------------
 	
 	* Zeno R.R. Davatz <zdavatz@ywesee.com>
+  * Masaomi Hatakeyama <mhatakeyama@ywesee.com>
