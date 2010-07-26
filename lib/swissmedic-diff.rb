@@ -5,6 +5,18 @@
 require 'ostruct'
 require 'spreadsheet'
 
+#
+#= diff command (compare two xls fles) for swissmedic xls file.
+#
+#Compares two Excel Documents provided by Swissmedic and displays the
+#salient differences. Also: Find out what Products have changed on the
+#swiss healthcare market.
+#
+#Authors::   Hannes Wyss (hwyss@ywesee.com), Masaomi Hatakeyama (mhatakeyama@ywesee.com)
+#Version::   0.1.2 2010-07-26 commit c30af5c15f6b8101f8f84cb482dfd09ab20729d6
+#Copyright:: Copyright (C) ywesee GmbH, 2010. All rights reserved.
+#License::   GPLv2.0 Compliance 
+#Source::    http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 class SwissmedicDiff
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, :product_group,
@@ -33,6 +45,7 @@ class SwissmedicDiff
       :atc_class                =>  'ATC-Code',
     }
     GALFORM_P = %r{excipiens\s+(ad|pro)\s+(?<galform>((?!\bpro\b)[^.])+)}
+
     def capitalize(string)
       string.split(/\s+/).collect { |word| word.capitalize }.join(' ')
     end
@@ -66,6 +79,14 @@ class SwissmedicDiff
         sprintf "%s (%s)", txt, cell(row, column(flag))
       end
     end
+
+    #=== Comparison two Excel files
+    #
+    #_target_:: new file path (String)
+    #_latest_:: old file path (String)
+    #_ignore_:: columns not to be comared (Symbol)
+    #
+    #return  :: differences (OpenStruct class)
     def diff(target, latest, ignore = [])
       replacements = {}
       known_regs, known_seqs, known_pacs, newest_rows = known_data(latest)
@@ -84,7 +105,7 @@ class SwissmedicDiff
       multiples = {}
       tbook.worksheet(0).each(3) { |row|
         if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
-          raise "Data missing in " + target + "\n(line " + row.idx.to_s + "): " + row.join(", ").to_s + "\n"
+          raise "Data missing in " + target + "\n(line " + (row.idx+1).to_s + "): " + row.join(", ").to_s + "\n"
         end
         group = cell(row, column(:product_group))
         if(group != 'TAM')
@@ -207,6 +228,14 @@ class SwissmedicDiff
       }
       flags
     end
+
+    #=== Output the differencies with String
+    #
+    # This should be called after diff method.
+    #
+    #_sort_ :: sort key (:group | :name | :registration)
+    #
+    #return :: difference (String)
     def to_s(sort=:group)
       return '' unless @diff
       @diff.changes.sort_by { |iksnr, flags| 

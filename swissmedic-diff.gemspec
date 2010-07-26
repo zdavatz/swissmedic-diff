@@ -3,11 +3,11 @@ require "rake"
 
 spec = Gem::Specification.new do |s|
    s.name        = "swissmedic-diff"
-   s.version     = "0.1.1"
+   s.version     = "0.1.2"
    s.summary     = "Find out what Products have changed on the swiss healthcare market"
    s.description = "Compares two Excel Documents provided by Swissmedic and displays the salient differences"
-   s.author      = "Hannes Wyss"
-   s.email       = "hwyss@ywesee.com"
+   s.author      = "Hannes Wyss, Masaomi Hatakeyama"
+   s.email       = "hwyss@ywesee.com, mhatakeyama@ywesee.com"
    s.platform    = Gem::Platform::RUBY
    s.autorequire = "swissmedic-diff"
    s.files       = FileList['lib/*.rb', 'bin/*', '[A-Z]*', 'test/*', 
