@@ -83,6 +83,9 @@ class SwissmedicDiff
       idx, prr, prp = nil
       multiples = {}
       tbook.worksheet(0).each(3) { |row|
+        if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
+          raise "Data missing in " + target + "\n(line " + row.idx.to_s + "): " + row.join(", ").to_s + "\n"
+        end
         group = cell(row, column(:product_group))
         if(group != 'TAM')
           iksnr = cell(row, column(:iksnr))

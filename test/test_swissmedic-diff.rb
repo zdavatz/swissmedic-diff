@@ -5,17 +5,21 @@
 $: << File.expand_path("../lib", File.dirname(__FILE__))
 
 require 'test/unit'
-require 'flexmock'
 require 'swissmedic-diff'
 
 module ODDB
   class SwissmedicPluginTest < Test::Unit::TestCase
-    include FlexMock::TestCase
     def setup
       @diff = SwissmedicDiff.new
       @data = File.expand_path 'data/Packungen.xls',
-                               File.dirname(__FILE__)
+                                File.dirname(__FILE__)
       @older = File.expand_path 'data/Packungen.older.xls',
+                                File.dirname(__FILE__)
+      @data_error_column = File.expand_path 'data/Packungen_error_column.xls',
+                                File.dirname(__FILE__)
+      @data_error_missing_case1 = File.expand_path 'data/Packungen_error_missing1.xls',
+                                File.dirname(__FILE__)
+      @data_error_missing_case2 = File.expand_path 'data/Packungen_error_missing2.xls',
                                 File.dirname(__FILE__)
       @workbook = Spreadsheet.open(@data)
     end
@@ -49,6 +53,25 @@ module ODDB
       assert_equal ["00274"], result.registration_deletions.at(0)
       assert_equal 1, result.replacements.size
       assert_equal '005', result.replacements.values.first
+    end
+    def test_diff_error_column
+      assert_raise(RuntimeError) { 
+        result = @diff.diff(@data_error_column, @older)
+      }
+    end
+
+    # if row.size < COLUMNS.size/2
+    def test_diff_error_missing_case1
+      assert_raise(RuntimeError) {
+        result = @diff.diff(@data_error_missing_case1, @older)
+      }
+    end
+
+    # if row.select{|val| val==nil}.size > COLUMNS.size/2
+    def test_diff_error_missing_case2
+      assert_raise(RuntimeError) {
+        result = @diff.diff(@data_error_missing_case2, @older)
+      }
     end
     def test_diff__ignore
       ignore = [:company, :atc_class]
