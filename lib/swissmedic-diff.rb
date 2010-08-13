@@ -19,7 +19,7 @@ require 'spreadsheet'
 #Source::    http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 class SwissmedicDiff
   module Diff
-    COLUMNS = [ :iksnr, :seqnr, :name_base, :company, :product_group,
+    COLUMNS = [ :iksnr, :seqnr, :name_base, :company, 
                 :index_therapeuticus, :atc_class, :production_science,
                 :registration_date, :sequence_date, :expiry_date, :ikscd,
                 :size, :unit, :ikscat, :substances, :composition,
@@ -107,8 +107,8 @@ class SwissmedicDiff
         if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
           raise "Data missing in " + target + "\n(line " + (row.idx+1).to_s + "): " + row.join(", ").to_s + "\n"
         end
-        group = cell(row, column(:product_group))
-        if(group != 'TAM')
+        group = cell(row, column(:production_science))
+        if(group != 'Tierarzneimittel')
           iksnr = cell(row, column(:iksnr))
           seqnr = "%02i" % cell(row, column(:seqnr)).to_i
           pacnr = cell(row, column(:ikscd))
@@ -187,8 +187,8 @@ class SwissmedicDiff
       idx, prr, prp = nil
       multiples = {}
       lbook.worksheet(0).each(3) { |row| 
-        group = cell(row, column(:product_group))
-        if(group != 'TAM')
+        group = cell(row, column(:production_science))
+        if(group != 'Tierarzneimittel')
           iksnr = cell(row, column(:iksnr))
           seqnr = "%02i" % cell(row, column(:seqnr)).to_i
           pacnr = cell(row, column(:ikscd))
