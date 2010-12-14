@@ -34,9 +34,6 @@ Then you can get the version 0.1.2.
 
 == INSTALL:
 
-Install
--------
-
 The easiest way to install is via RubyGems. On the command line enter:
 
 * gem build swissmedic-diff.gemspec
