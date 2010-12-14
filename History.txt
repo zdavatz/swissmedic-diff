@@ -1,0 +1,13 @@
+=== 0.1.3 / 16.8.2010
+
+* Swissmedic_Packungen without 'Gruppe'
+
+  * Version 0.1.3 is capable of the Packungen.xls without column 'Gruppe',
+  column E in the previous format. If you want to use Packunge.xls
+  including the column 'Gruppe', you should use version 0.1.2. After
+  you get the source code via Git command, type in the swissmedic-diff
+  directory as follows:
+
+    * git checkout 4c8c9323297453c3cb3380a9d41457d534ed8861
+
+  Then you can get the version 0.1.2.
