@@ -1,0 +1,12 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/swissmedic-diff
+lib/swissmedic-diff.rb
+test/test_swissmedic-diff.rb
+test/data/Packungen_error_column.xls
+test/data/Packungen_error_missing1.xls
+test/data/Packungen_error_missing2.xls
+test/data/Packungen.older.xls
+test/data/Packungen.xls
