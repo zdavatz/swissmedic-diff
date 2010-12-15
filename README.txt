@@ -1,4 +1,4 @@
-= swissmedic_diff
+= swissmedic-diff
 
 * http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 

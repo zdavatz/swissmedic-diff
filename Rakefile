@@ -11,7 +11,7 @@ require 'hoe'
 # Hoe.plugin :rubyforge
 # Hoe.plugin :rubyforge
 
-Hoe.spec 'swissmedic_diff' do
+Hoe.spec 'swissmedic-diff' do
   # HEY! If you fill these out in ~/.hoe_template/Rakefile.erb then
   # you'll never have to touch them again!
   # (delete this comment too, of course)
