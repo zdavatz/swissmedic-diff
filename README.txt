@@ -30,7 +30,7 @@ Then you can get the version 0.1.2.
 == REQUIREMENTS:
 
 * ruby 1.8 (with oniguruma patch) or ruby 1.9
-* parseexcel
+* spreadsheet
 
 == INSTALL:
 
@@ -61,8 +61,8 @@ Usage: /usr/bin/swissmedic-diff [-gnr] <file1> <file2> [<output>]
 
   * Hannes Wyss <hwyss@ywesee.com>
   * Masaomi Hatakeyama <mhatakeyama@ywesee.com>
+  * Zeno R.R. Davatz <zdavatz@ywesee.com>
 
 == LICENSE:
 
-  * LGPL
-  * http://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License
+  * GPLv2
