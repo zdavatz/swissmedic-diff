@@ -5,6 +5,7 @@ before_install:
 notifications:
   email:
   - ngiger@ywesee.com
+  - zdavatz@ywesee.com
 rvm:
   - ruby-head
   - 2.0.0
