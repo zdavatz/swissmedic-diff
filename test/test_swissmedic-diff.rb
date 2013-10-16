@@ -21,7 +21,42 @@ module ODDB
                                 File.dirname(__FILE__)
       @data_error_missing_case2 = File.expand_path 'data/Packungen_error_missing2.xls',
                                 File.dirname(__FILE__)
+      @data_2013 = File.expand_path 'data/Packungen-2013.10.14.xls',
+                                File.dirname(__FILE__)
       @workbook = Spreadsheet.open(@data)
+    end
+    def test_diff_pre_2013_to_2013
+      result = @diff.diff(@data_2013, @data)
+      assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in difference")
+      assert_equal 6, result.news.size
+      expected = {
+"00277"=>
+  [:company, :sequence_date, :ikscd, :substances, :composition, :name_base],
+ "61338"=>[:sequence_date, :ikscd, :company, :atc_class],
+ "61367"=>
+  [:sequence_date,
+   :ikscd,
+   :ikscat,
+   :substances,
+   :composition,
+   :sequence,
+   :replaced_package],
+ "61416"=>[:sequence_date, :ikscd],
+ "63164"=>[:new],
+ "65040"=>[:new],
+ "00275"=>[:delete],
+ "61345"=>[:delete]
+      }
+      assert_equal(expected, result.changes)
+      diff_string =%(+ 63164: Rivastigmin Patch Sandoz 5, Transdermales Pflaster
++ 65040: Panthoben, Salbe
+- 00275: Cardio-Pulmo-Rénal Sérocytol, suppositoire
+- 61345: Terbinafin-Teva 125 mg, Tabletten
+> 00277: Coeur-Vaisseaux Sérocytol, suppositoire; Zulassungsinhaber (Sérolab, société anonyme), Zulassungsdatum Sequenz (2010-04-26), ikscd (1), Wirkstoffe (globulina equina (immunisé avec coeur, endothélium vasculaire porcins)), Zusammensetzung (globulina equina (immunisé avec coeur, endothélium vasculaire porcins) 8 mg, propylenglycolum, conserv.: E 216, E 218, excipiens pro suppositorio.), Namensänderung (Coeur-Vaisseaux Sérocytol, suppositoire)
+> 61338: Cefuroxim Fresenius i.v. 750 mg, Pulver zur Herstellung einer i.v. Lösung; Zulassungsdatum Sequenz (2010-03-16), ikscd (1), Zulassungsinhaber (Fresenius Kabi (Schweiz) AG), ATC-Code (J01DC02)
+> 61367: Hypericum-Mepha 250, Lactab; Zulassungsdatum Sequenz (2010-04-23), ikscd (1), Abgabekategorie (D), Wirkstoffe (hyperici herbae extractum ethanolicum siccum quantificatum), Zusammensetzung (hyperici herbae extractum ethanolicum siccum quantificatum 250 mg corresp. hypericinum 0.25-0.75 mg, DER: 4-7:1, excipiens pro compresso obducto.), Packungs-Nummer (006 -> 005)
+> 61416: Otriduo Schnupfen, Nasentropfen; Zulassungsdatum Sequenz (2010-05-12), ikscd (1))
+      assert_equal(diff_string, @diff.to_s)      
     end
     def test_diff
       result = @diff.diff(@data, @older)
@@ -56,21 +91,21 @@ module ODDB
     end
     def test_diff_error_column
       assert_raise(RuntimeError) { 
-        result = @diff.diff(@data_error_column, @older)
+        @diff.diff(@data_error_column, @older)
       }
     end
 
     # if row.size < COLUMNS.size/2
     def test_diff_error_missing_case1
       assert_raise(RuntimeError) {
-        result = @diff.diff(@data_error_missing_case1, @older)
+        @diff.diff(@data_error_missing_case1, @older)
       }
     end
 
     # if row.select{|val| val==nil}.size > COLUMNS.size/2
     def test_diff_error_missing_case2
       assert_raise(RuntimeError) {
-        result = @diff.diff(@data_error_missing_case2, @older)
+        @diff.diff(@data_error_missing_case2, @older)
       }
     end
     def test_diff__ignore
@@ -108,7 +143,7 @@ module ODDB
       assert_nothing_raised {
         @diff.to_s
       }
-      result = @diff.diff(@data, @older)
+      @diff.diff(@data, @older)
       assert_equal <<-EOS.strip, @diff.to_s
 + 00275: Cardio-Pulmo-Rénal Sérocytol, suppositoire
 + 61416: Otriduo Schnupfen, Nasentropfen
