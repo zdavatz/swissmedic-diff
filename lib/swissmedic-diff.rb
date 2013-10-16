@@ -289,10 +289,8 @@ class SwissmedicDiff
     #
     #return  ::
     def each_valid_row(spreadsheet)
+      skipRows = rows_to_skip(spreadsheet)
       worksheet = spreadsheet.worksheet(0)
-      # Packungen.xls of swissmedic before October 2013 had  3 leading rows
-      # Packungen.xls of swissmedic after  October 2013 have 4 leading rows
-      skipRows = worksheet.row(3)[0].to_i == 0 ? 4 : 3
       worksheet.each(skipRows) {
         |row|
         if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
@@ -305,6 +303,15 @@ class SwissmedicDiff
         yield row
       }
     end
+    
+    def rows_to_skip(spreadsheet)
+      # Packungen.xls of swissmedic before October 2013 had  3 leading rows
+      # Packungen.xls of swissmedic after  October 2013 have 4 leading rows
+      j = 0
+      j += 1 while spreadsheet.worksheet(0).row(j)[0].to_i == 0
+      j
+    end
+    
   end
   include Diff
 end
