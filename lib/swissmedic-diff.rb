@@ -12,12 +12,12 @@ require 'spreadsheet'
 #swiss healthcare market.
 #
 #Authors::   Hannes Wyss (hwyss@ywesee.com), Masaomi Hatakeyama (mhatakeyama@ywesee.com)
-#Version::   0.1.2 2010-07-26 commit c30af5c15f6b8101f8f84cb482dfd09ab20729d6
+#Version::   0.1.4 2013-10-16 commit c30af5c15f6b8101f8f84cb482dfd09ab20729d6
 #Copyright:: Copyright (C) ywesee GmbH, 2010. All rights reserved.
 #License::   GPLv2.0 Compliance 
 #Source::    http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 class SwissmedicDiff
-    VERSION = '0.2'
+    VERSION = '0.1.4'
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, 
                 :index_therapeuticus, :atc_class, :production_science,
