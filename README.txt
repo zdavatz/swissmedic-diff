@@ -1,6 +1,6 @@
 = swissmedic-diff
 
-* http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
+* https://github.com/zdavatz/swissmedic-diff
 
 == DESCRIPTION:
 
