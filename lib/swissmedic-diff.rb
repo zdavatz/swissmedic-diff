@@ -17,7 +17,7 @@ require 'spreadsheet'
 #License::   GPLv2.0 Compliance 
 #Source::    http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 class SwissmedicDiff
-    VERSION = '0.1.3'
+    VERSION = '0.2'
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, 
                 :index_therapeuticus, :atc_class, :production_science,
@@ -103,15 +103,17 @@ class SwissmedicDiff
       end
       idx, prr, prp = nil
       multiples = {}
-      tbook.worksheet(0).each(3) { |row|
+      skipRows = tbook.worksheet(0).row(3)[0].to_i == 0 ? 4 : 3
+      tbook.worksheet(0).each(skipRows) { |row|
         if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
           raise "Data missing in " + target + "\n(line " + (row.idx+1).to_s + "): " + row.join(", ").to_s + "\n"
         end
         group = cell(row, column(:production_science))
         if(group != 'Tierarzneimittel')
-          iksnr = cell(row, column(:iksnr))
+          iksnr = "%05i" % cell(row, column(:iksnr)).to_i
+          row[column(:iksnr)] = iksnr
           seqnr = "%02i" % cell(row, column(:seqnr)).to_i
-          pacnr = cell(row, column(:ikscd))
+          pacnr = "%03i" % cell(row, column(:ikscd)).to_i
           (multiples[iksnr] ||= {})
           if prr == iksnr && prp == pacnr
             idx += 1
@@ -147,7 +149,7 @@ class SwissmedicDiff
         end
       }
       @diff.replacements = reps = {}
-      known_pacs.each { |(iksnr, pacnr, idx), row|
+      known_pacs.each { |(iksnr, pacnr), row|
         key = [iksnr, '%02i' % cell(row, column(:seqnr)).to_i, 
                       cell(row, column(:size)), cell(row, column(:unit))]
         if(rep = replacements[key])
@@ -186,12 +188,13 @@ class SwissmedicDiff
       lbook = Spreadsheet.open(latest)
       idx, prr, prp = nil
       multiples = {}
-      lbook.worksheet(0).each(3) { |row| 
+      skipRows = lbook.worksheet(0).row(3)[0].to_i == 0 ? 4 : 3
+      lbook.worksheet(0).each(skipRows) { |row|
         group = cell(row, column(:production_science))
         if(group != 'Tierarzneimittel')
           iksnr = cell(row, column(:iksnr))
           seqnr = "%02i" % cell(row, column(:seqnr)).to_i
-          pacnr = cell(row, column(:ikscd))
+          pacnr = "%03i" % cell(row, column(:ikscd)).to_i
           multiples[iksnr] ||= {}
           if prr == iksnr && prp == pacnr
             idx += 1
@@ -237,6 +240,7 @@ class SwissmedicDiff
     #
     #return :: difference (String)
     def to_s(sort=:group)
+      @diff ||= nil
       return '' unless @diff
       @diff.changes.sort_by { |iksnr, flags| 
         _sort_by(sort, iksnr, flags)
