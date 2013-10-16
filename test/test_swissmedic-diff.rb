@@ -25,23 +25,45 @@ module ODDB
                                 File.dirname(__FILE__)
       @workbook = Spreadsheet.open(@data)
     end
+
+    def test_iterate
+      diff = SwissmedicDiff.new
+      strings = []
+      diff.each_valid_row(Spreadsheet.open(@data_2013)) { |x| strings << "iksnr #{x[0]} packungs id #{x[diff.column(:ikscd)]}" }
+      expected = [
+        "iksnr 00277 packungs id 001",
+        "iksnr 00277 packungs id 002",
+        "iksnr 61338 packungs id 001",
+        "iksnr 61338 packungs id 002",
+        "iksnr 61367 packungs id 001",
+        "iksnr 61367 packungs id 002",
+        "iksnr 61367 packungs id 003",
+        "iksnr 61367 packungs id 004",
+        "iksnr 61367 packungs id 005",
+        "iksnr 61416 packungs id 001",
+        "iksnr 63164 packungs id 001",
+        "iksnr 63164 packungs id 002",
+        "iksnr 63164 packungs id 003",
+        "iksnr 65040 packungs id 001"
+      ]
+      assert_equal(expected, strings)
+    end
+
     def test_diff_pre_2013_to_2013
       result = @diff.diff(@data_2013, @data)
       assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in difference")
       assert_equal 6, result.news.size
       expected = {
-"00277"=>
-  [:company, :sequence_date, :ikscd, :substances, :composition, :name_base],
- "61338"=>[:sequence_date, :ikscd, :company, :atc_class],
+"00277"=>[:company, :sequence_date, :substances, :composition, :name_base],
+ "61338"=>[:sequence_date, :company, :atc_class],
  "61367"=>
   [:sequence_date,
-   :ikscd,
    :ikscat,
    :substances,
    :composition,
    :sequence,
    :replaced_package],
- "61416"=>[:sequence_date, :ikscd],
+ "61416"=>[:sequence_date],
  "63164"=>[:new],
  "65040"=>[:new],
  "00275"=>[:delete],
@@ -52,10 +74,10 @@ module ODDB
 + 65040: Panthoben, Salbe
 - 00275: Cardio-Pulmo-Rénal Sérocytol, suppositoire
 - 61345: Terbinafin-Teva 125 mg, Tabletten
-> 00277: Coeur-Vaisseaux Sérocytol, suppositoire; Zulassungsinhaber (Sérolab, société anonyme), Zulassungsdatum Sequenz (2010-04-26), ikscd (1), Wirkstoffe (globulina equina (immunisé avec coeur, endothélium vasculaire porcins)), Zusammensetzung (globulina equina (immunisé avec coeur, endothélium vasculaire porcins) 8 mg, propylenglycolum, conserv.: E 216, E 218, excipiens pro suppositorio.), Namensänderung (Coeur-Vaisseaux Sérocytol, suppositoire)
-> 61338: Cefuroxim Fresenius i.v. 750 mg, Pulver zur Herstellung einer i.v. Lösung; Zulassungsdatum Sequenz (2010-03-16), ikscd (1), Zulassungsinhaber (Fresenius Kabi (Schweiz) AG), ATC-Code (J01DC02)
-> 61367: Hypericum-Mepha 250, Lactab; Zulassungsdatum Sequenz (2010-04-23), ikscd (1), Abgabekategorie (D), Wirkstoffe (hyperici herbae extractum ethanolicum siccum quantificatum), Zusammensetzung (hyperici herbae extractum ethanolicum siccum quantificatum 250 mg corresp. hypericinum 0.25-0.75 mg, DER: 4-7:1, excipiens pro compresso obducto.), Packungs-Nummer (006 -> 005)
-> 61416: Otriduo Schnupfen, Nasentropfen; Zulassungsdatum Sequenz (2010-05-12), ikscd (1))
+> 00277: Coeur-Vaisseaux Sérocytol, suppositoire; Zulassungsinhaber (Sérolab, société anonyme), Zulassungsdatum Sequenz (2010-04-26), Wirkstoffe (globulina equina (immunisé avec coeur, endothélium vasculaire porcins)), Zusammensetzung (globulina equina (immunisé avec coeur, endothélium vasculaire porcins) 8 mg, propylenglycolum, conserv.: E 216, E 218, excipiens pro suppositorio.), Namensänderung (Coeur-Vaisseaux Sérocytol, suppositoire)
+> 61338: Cefuroxim Fresenius i.v. 750 mg, Pulver zur Herstellung einer i.v. Lösung; Zulassungsdatum Sequenz (2010-03-16), Zulassungsinhaber (Fresenius Kabi (Schweiz) AG), ATC-Code (J01DC02)
+> 61367: Hypericum-Mepha 250, Lactab; Zulassungsdatum Sequenz (2010-04-23), Abgabekategorie (D), Wirkstoffe (hyperici herbae extractum ethanolicum siccum quantificatum), Zusammensetzung (hyperici herbae extractum ethanolicum siccum quantificatum 250 mg corresp. hypericinum 0.25-0.75 mg, DER: 4-7:1, excipiens pro compresso obducto.), Packungs-Nummer (006 -> 005)
+> 61416: Otriduo Schnupfen, Nasentropfen; Zulassungsdatum Sequenz (2010-05-12))
       assert_equal(diff_string, @diff.to_s)      
     end
     def test_diff

@@ -17,7 +17,8 @@ require 'spreadsheet'
 #License::   GPLv2.0 Compliance 
 #Source::    http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 class SwissmedicDiff
-    VERSION = '0.1.4'
+  VERSION = '0.1.4'
+
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, 
                 :index_therapeuticus, :atc_class, :production_science,
@@ -84,7 +85,7 @@ class SwissmedicDiff
     #
     #_target_:: new file path (String)
     #_latest_:: old file path (String)
-    #_ignore_:: columns not to be comared (Symbol)
+    #_ignore_:: columns not to be compared (Symbol)
     #
     #return  :: differences (OpenStruct class)
     def diff(target, latest, ignore = [])
@@ -103,49 +104,41 @@ class SwissmedicDiff
       end
       idx, prr, prp = nil
       multiples = {}
-      skipRows = tbook.worksheet(0).row(3)[0].to_i == 0 ? 4 : 3
-      tbook.worksheet(0).each(skipRows) { |row|
-        if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
-          raise "Data missing in " + target + "\n(line " + (row.idx+1).to_s + "): " + row.join(", ").to_s + "\n"
+      each_valid_row(tbook) { |row|
+        iksnr = cell(row, column(:iksnr))
+        seqnr = cell(row, column(:seqnr))
+        pacnr = cell(row, column(:ikscd))
+        (multiples[iksnr] ||= {})
+        if prr == iksnr && prp == pacnr
+          idx += 1
+        elsif previous = multiples[iksnr][pacnr]
+          prr = iksnr
+          prp = pacnr
+          idx = previous[COLUMNS.size].to_i + 1
+        else
+          prr = iksnr
+          prp = pacnr
+          idx = 0
         end
-        group = cell(row, column(:production_science))
-        if(group != 'Tierarzneimittel')
-          iksnr = "%05i" % cell(row, column(:iksnr)).to_i
-          row[column(:iksnr)] = iksnr
-          seqnr = "%02i" % cell(row, column(:seqnr)).to_i
-          pacnr = "%03i" % cell(row, column(:ikscd)).to_i
-          (multiples[iksnr] ||= {})
-          if prr == iksnr && prp == pacnr
-            idx += 1
-          elsif previous = multiples[iksnr][pacnr]
-            prr = iksnr
-            prp = pacnr
-            idx = previous[COLUMNS.size].to_i + 1
-          else
-            prr = iksnr
-            prp = pacnr
-            idx = 0
-          end
-          row[COLUMNS.size] = idx
-          (newest_rows[iksnr] ||= {})[pacnr] = row
-          multiples[iksnr][pacnr] = row
-          if(other = known_regs.delete([iksnr]))
-            changes[iksnr] ||= []
-          else
-            changes[iksnr] ||= [:new]
-          end
-          known_seqs.delete([iksnr, seqnr])
-          if(other = known_pacs.delete([iksnr, pacnr, idx]))
-            flags = rows_diff(row, other, ignore)
-            (changes[iksnr].concat flags).uniq!
-            updates.push row unless flags.empty?
-          else
-            replacements.store [ iksnr, seqnr, cell(row, column(:size)), 
-                                 cell(row, column(:unit)) ], row
-            flags = changes[iksnr]
-            flags.push(:sequence).uniq! unless(flags.include? :new)
-            news.push row
-          end
+        row[COLUMNS.size] = idx
+        (newest_rows[iksnr] ||= {})[pacnr] = row
+        multiples[iksnr][pacnr] = row
+        if(other = known_regs.delete([iksnr]))
+          changes[iksnr] ||= []
+        else
+          changes[iksnr] ||= [:new]
+        end
+        known_seqs.delete([iksnr, seqnr])
+        if(other = known_pacs.delete([iksnr, pacnr, idx]))
+          flags = rows_diff(row, other, ignore)
+          (changes[iksnr].concat flags).uniq!
+          updates.push row unless flags.empty?
+        else
+          replacements.store [ iksnr, seqnr, cell(row, column(:size)), 
+                                cell(row, column(:unit)) ], row
+          flags = changes[iksnr]
+          flags.push(:sequence).uniq! unless(flags.include? :new)
+          news.push row
         end
       }
       @diff.replacements = reps = {}
@@ -188,32 +181,28 @@ class SwissmedicDiff
       lbook = Spreadsheet.open(latest)
       idx, prr, prp = nil
       multiples = {}
-      skipRows = lbook.worksheet(0).row(3)[0].to_i == 0 ? 4 : 3
-      lbook.worksheet(0).each(skipRows) { |row|
-        group = cell(row, column(:production_science))
-        if(group != 'Tierarzneimittel')
-          iksnr = cell(row, column(:iksnr))
-          seqnr = "%02i" % cell(row, column(:seqnr)).to_i
-          pacnr = "%03i" % cell(row, column(:ikscd)).to_i
-          multiples[iksnr] ||= {}
-          if prr == iksnr && prp == pacnr
-            idx += 1
-          elsif previous = multiples[iksnr][pacnr]
-            prr = iksnr
-            prp = pacnr
-            idx = previous[COLUMNS.size].to_i + 1
-          else
-            prr = iksnr
-            prp = pacnr
-            idx = 0
-          end
-          multiples[iksnr][pacnr] = row
-          row[COLUMNS.size] = idx
-          known_regs.store [iksnr], row
-          known_seqs.store [iksnr, seqnr], row
-          known_pacs.store [iksnr, pacnr, idx], row
-          (newest_rows[iksnr] ||= {})[pacnr] = row
+      each_valid_row(lbook) { |row|
+        iksnr = cell(row, column(:iksnr))
+        seqnr = cell(row, column(:seqnr))
+        pacnr = cell(row, column(:ikscd))
+        multiples[iksnr] ||= {}
+        if prr == iksnr && prp == pacnr
+          idx += 1
+        elsif previous = multiples[iksnr][pacnr]
+          prr = iksnr
+          prp = pacnr
+          idx = previous[COLUMNS.size].to_i + 1
+        else
+          prr = iksnr
+          prp = pacnr
+          idx = 0
         end
+        multiples[iksnr][pacnr] = row
+        row[COLUMNS.size] = idx
+        known_regs.store [iksnr], row
+        known_seqs.store [iksnr, seqnr], row
+        known_pacs.store [iksnr, pacnr, idx], row
+        (newest_rows[iksnr] ||= {})[pacnr] = row                            
       }
     end
     def name(diff, iksnr)
@@ -284,6 +273,37 @@ class SwissmedicDiff
           cell(row, idx).downcase.gsub(/\s+/, "")
         end
       end
+    end
+  
+    #=== iterate over all valid rows of a swissmedic Packungen.xls
+    #
+    # Iterates over all rows, ignoring Tierarzneimittel and
+    # lines  with not enough data
+    # Patches the fields :iksnr, :seqnr, :ikscd to match the old swissmedic convention
+    # of a fixed sized string
+    #
+    # example:
+    #   SwissmedicDiff.new.each_valid_row(Spreadsheet.open('path/to/file')) { |x| puts "iksnr #{x[0]}" }
+    #
+    #_spreadsheet_:: spreadsheet to operate on
+    #
+    #return  ::
+    def each_valid_row(spreadsheet)
+      worksheet = spreadsheet.worksheet(0)
+      # Packungen.xls of swissmedic before October 2013 had  3 leading rows
+      # Packungen.xls of swissmedic after  October 2013 have 4 leading rows
+      skipRows = worksheet.row(3)[0].to_i == 0 ? 4 : 3
+      worksheet.each(skipRows) {
+        |row|
+        if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
+          raise "Data missing in \n(line " + (row.idx+1).to_s + "): " + row.join(", ").to_s + "\n"
+        end
+        next if (cell(row, column(:production_science)) == 'Tierarzneimittel')
+        row[column(:iksnr)] = "%05i" % cell(row, column(:iksnr)).to_i
+        row[column(:seqnr)] = "%02i" % cell(row, column(:seqnr)).to_i
+        row[column(:ikscd)] = "%03i" % cell(row, column(:ikscd)).to_i
+        yield row
+      }
     end
   end
   include Diff
