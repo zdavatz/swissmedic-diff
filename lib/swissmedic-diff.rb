@@ -294,7 +294,8 @@ class SwissmedicDiff
       worksheet.each(skipRows) {
         |row|
         if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
-          raise "Data missing in \n(line " + (row.idx+1).to_s + "): " + row.join(", ").to_s + "\n"
+          $stdout.puts "Data missing in \n(line " + (row.idx+1).to_s + "): " + row.join(", ").to_s + "\n"
+          next
         end
         next if (cell(row, column(:production_science)) == 'Tierarzneimittel')
         row[column(:iksnr)] = "%05i" % cell(row, column(:iksnr)).to_i
