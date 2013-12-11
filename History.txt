@@ -1,3 +1,11 @@
+=== 0.1.5 / 11.12.2010
+
+* Updated tests as we no longer raise an error
+* Update to spreadsheet 0.9.6
+* Just display unhandled line instead of raising an exception
+* daily_travis_ci.rb on 20131124
+* updated Manifest.txt
+
 === 0.1.4 / 22.10.2010
 
 * Add utility proc rows_to_skip

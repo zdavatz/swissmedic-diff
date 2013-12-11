@@ -17,7 +17,7 @@ require 'spreadsheet'
 #License::   GPLv2.0 Compliance 
 #Source::    http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 class SwissmedicDiff
-  VERSION = '0.1.4'
+  VERSION = '0.1.5'
 
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, 
