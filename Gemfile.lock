@@ -10,9 +10,9 @@ GEM
     ansi (1.4.3)
     builder (3.2.2)
     hashie (2.0.5)
-    hoe (3.7.1)
+    hoe (3.7.2)
       rake (>= 0.8, < 11.0)
-    minitest (5.0.8)
+    minitest (5.1.0)
     minitest-reporters (1.0.0)
       ansi
       builder
@@ -23,7 +23,7 @@ GEM
       hashie (>= 1.1.0)
     rake (10.1.0)
     ruby-ole (1.2.11.7)
-    spreadsheet (0.9.5)
+    spreadsheet (0.9.6)
       ruby-ole (>= 1.0)
 
 PLATFORMS
