@@ -4,11 +4,11 @@
 
 $: << File.expand_path("../lib", File.dirname(__FILE__))
 
-require 'test/unit'
+require 'minitest/autorun'
 require 'swissmedic-diff'
 
 module ODDB
-  class SwissmedicPluginTest < Test::Unit::TestCase
+  class SwissmedicPluginTest < Minitest::Test
     def setup
       @diff = SwissmedicDiff.new
       @data = File.expand_path 'data/Packungen.xls',
@@ -26,6 +26,26 @@ module ODDB
       @workbook = Spreadsheet.open(@data)
     end
 
+    # This is not a unit test as it takes way too long (> 1 minute)
+    # Instead it might just tell you how to test with real data
+    def test_real_diff
+      require 'pp'  
+      @diff = SwissmedicDiff.new
+      last_month = File.expand_path 'data/Packungen-2013.08.16.xls',  File.dirname(__FILE__)
+      this_month = File.expand_path 'data/Packungen-2013.11.04.xls',  File.dirname(__FILE__)
+      result = @diff.diff last_month, this_month, [:atc_class, :sequence_date]
+      pp result.news.first
+      pp result.news.last
+      pp result.updates.first
+      pp result.replacements.first
+#      assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
+#      assert(result.news.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
+#      assert(result.news.flatten.index('00277') == nil, "Should not find 00277 in news")
+      pp result.news.size
+      pp result.updates.size
+      pp result.replacements.size
+    end if false
+    
     def test_iterate
       diff = SwissmedicDiff.new
       strings = []
@@ -51,7 +71,9 @@ module ODDB
 
     def test_diff_pre_2013_to_2013
       result = @diff.diff(@data_2013, @data)
-      assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in difference")
+      assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
+      assert(result.news.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
+      assert(result.news.flatten.index('00277') == nil, "Should not find 00277 in news")
       assert_equal 6, result.news.size
       expected = {
 "00277"=>[:company, :sequence_date, :substances, :composition, :name_base],
@@ -112,23 +134,21 @@ module ODDB
       assert_equal '005', result.replacements.values.first
     end
     def test_diff_error_column
-      assert_raise(RuntimeError) { 
+      assert_raises(RuntimeError) { 
         @diff.diff(@data_error_column, @older)
       }
     end
 
     # if row.size < COLUMNS.size/2
+    # as per december 2013 does no longer raise an error, but outputs the problematic line
     def test_diff_error_missing_case1
-      assert_raise(RuntimeError) {
-        @diff.diff(@data_error_missing_case1, @older)
-      }
+      @diff.diff(@data_error_missing_case1, @older)
     end
 
     # if row.select{|val| val==nil}.size > COLUMNS.size/2
+    # as per december 2013 does no longer raise an error, but outputs the problematic line
     def test_diff_error_missing_case2
-      assert_raise(RuntimeError) {
-        @diff.diff(@data_error_missing_case2, @older)
-      }
+      @diff.diff(@data_error_missing_case2, @older)
     end
     def test_diff__ignore
       ignore = [:company, :atc_class]
@@ -162,9 +182,7 @@ module ODDB
       assert_equal '005', result.replacements.values.first
     end
     def test_to_s
-      assert_nothing_raised {
-        @diff.to_s
-      }
+      @diff.to_s
       @diff.diff(@data, @older)
       assert_equal <<-EOS.strip, @diff.to_s
 + 00275: Cardio-Pulmo-Rénal Sérocytol, suppositoire
