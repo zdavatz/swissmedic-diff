@@ -2,7 +2,9 @@ PATH
   remote: .
   specs:
     swissmedic-diff (0.1.5)
+      nokogiri
       rubyXL
+      rubyzip
       spreadsheet
 
 GEM
@@ -13,18 +15,22 @@ GEM
     hashie (2.0.5)
     hoe (3.7.4)
       rake (>= 0.8, < 11.0)
+    mini_portile (0.5.2)
     minitest (5.2.1)
     minitest-reporters (1.0.0)
       ansi
       builder
       minitest (>= 5.0)
       powerbar
+    nokogiri (1.6.0)
+      mini_portile (~> 0.5.0)
     powerbar (1.0.11)
       ansi (~> 1.4.0)
       hashie (>= 1.1.0)
     rake (10.1.1)
     ruby-ole (1.2.11.7)
     rubyXL (1.2.10)
+    rubyzip (0.9.9)
     spreadsheet (0.9.6)
       ruby-ole (>= 1.0)
 
