@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'lib', 'swissmedic-diff.rb')
+require File.expand_path('../lib/version', __FILE__)
 
 spec = Gem::Specification.new do |s|
    s.name        = "swissmedic-diff"

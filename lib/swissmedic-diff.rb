@@ -18,8 +18,6 @@ require 'rubyXL'
 #License::   GPLv2.0 Compliance 
 #Source::    http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 class SwissmedicDiff
-  VERSION = '0.1.5'
-
   module Diff
     COLUMNS = [ :iksnr, :seqnr, :name_base, :company, 
                 :index_therapeuticus, :atc_class, :production_science,
