@@ -1,6 +1,8 @@
+require File.join(File.dirname(__FILE__), 'lib', 'swissmedic-diff.rb')
+
 spec = Gem::Specification.new do |s|
    s.name        = "swissmedic-diff"
-   s.version     = "0.1.4"
+   s.version     = SwissmedicDiff::VERSION
    s.summary     = "Find out what Products have changed on the swiss healthcare market"
    s.description = "Compares two Excel Documents provided by Swissmedic and displays the salient differences"
    s.author      = "Hannes Wyss, Masaomi Hatakeyama"
@@ -13,6 +15,7 @@ spec = Gem::Specification.new do |s|
                    Dir.glob('test/data/*.xls')
    s.test_file   = "test/test_swissmedic-diff.rb"
    s.executables << 'swissmedic-diff'
+   s.add_dependency('rubyXL')
    s.add_dependency('spreadsheet')
    s.add_development_dependency "hoe"
    s.add_development_dependency "minitest"

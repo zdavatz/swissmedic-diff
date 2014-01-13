@@ -4,6 +4,7 @@
 
 require 'ostruct'
 require 'spreadsheet'
+require 'rubyXL'
 
 #= diff command (compare two xls fles) for swissmedic xls file.
 #
@@ -97,7 +98,11 @@ class SwissmedicDiff
       @diff.changes = changes = {}
       @diff.newest_rows = newest_rows
       Spreadsheet.client_encoding = 'UTF-8'
-      tbook = Spreadsheet.open(target)
+      if File.extname(target).eql?('.xlsx')
+        tbook = RubyXL::Parser.parse(File.expand_path(target))
+      else
+        tbook = Spreadsheet.open(target)
+      end
       sheet = tbook.worksheet(0)
       if new_column = cell(sheet.row(2), COLUMNS.size)
         raise "New column #{COLUMNS.size} (#{new_column})"
@@ -178,7 +183,11 @@ class SwissmedicDiff
       [known_regs, known_seqs, known_pacs, newest_rows]
     end
     def _known_data(latest, known_regs, known_seqs, known_pacs, newest_rows)
-      lbook = Spreadsheet.open(latest)
+      if File.extname(latest).eql?('.xlsx')
+        lbook = RubyXL::Parser.parse(File.expand_path(latest)).worksheets[0]
+      else
+        lbook = Spreadsheet.open(latest)
+      end
       idx, prr, prp = nil
       multiples = {}
       each_valid_row(lbook) { |row|
@@ -290,11 +299,18 @@ class SwissmedicDiff
     #return  ::
     def each_valid_row(spreadsheet)
       skipRows = rows_to_skip(spreadsheet)
-      worksheet = spreadsheet.worksheet(0)
-      worksheet.each(skipRows) {
+      if spreadsheet.class.eql?(RubyXL::Worksheet)
+        worksheet = spreadsheet
+      else
+        worksheet = spreadsheet.worksheet(0)
+      end
+      row_nr = 0
+      worksheet.each() {
         |row|
+        row_nr += 1
+        next if row_nr <= skipRows
         if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
-          $stdout.puts "Data missing in \n(line " + (row.idx+1).to_s + "): " + row.join(", ").to_s + "\n"
+          $stdout.puts "Data missing in \n(line " + (row_nr).to_s + "): " + row.join(", ").to_s + "\n"
           next
         end
         next if (cell(row, column(:production_science)) == 'Tierarzneimittel')
@@ -309,7 +325,11 @@ class SwissmedicDiff
       # Packungen.xls of swissmedic before October 2013 had  3 leading rows
       # Packungen.xls of swissmedic after  October 2013 have 4 leading rows
       j = 0
-      j += 1 while spreadsheet.worksheet(0).row(j)[0].to_i == 0
+      if spreadsheet.class.eql?(RubyXL::Worksheet)
+        j += 1 while spreadsheet[j][0] and spreadsheet[j][0].value.to_i == 0
+      else
+        j += 1 while spreadsheet.worksheet(0).row(j)[0].to_i == 0
+      end
       j
     end
     

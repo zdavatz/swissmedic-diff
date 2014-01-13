@@ -1,7 +1,8 @@
 PATH
   remote: .
   specs:
-    swissmedic-diff (0.1.4)
+    swissmedic-diff (0.1.5)
+      rubyXL
       spreadsheet
 
 GEM
@@ -10,9 +11,9 @@ GEM
     ansi (1.4.3)
     builder (3.2.2)
     hashie (2.0.5)
-    hoe (3.7.2)
+    hoe (3.7.4)
       rake (>= 0.8, < 11.0)
-    minitest (5.1.0)
+    minitest (5.2.1)
     minitest-reporters (1.0.0)
       ansi
       builder
@@ -21,8 +22,9 @@ GEM
     powerbar (1.0.11)
       ansi (~> 1.4.0)
       hashie (>= 1.1.0)
-    rake (10.1.0)
+    rake (10.1.1)
     ruby-ole (1.2.11.7)
+    rubyXL (1.2.10)
     spreadsheet (0.9.6)
       ruby-ole (>= 1.0)
 

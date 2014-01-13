@@ -6,6 +6,7 @@ $: << File.expand_path("../lib", File.dirname(__FILE__))
 
 require 'minitest/autorun'
 require 'swissmedic-diff'
+require 'pp'  
 
 module ODDB
   class SwissmedicPluginTest < Minitest::Test
@@ -25,27 +26,31 @@ module ODDB
                                 File.dirname(__FILE__)
       @workbook = Spreadsheet.open(@data)
     end
-
+    # This is not a unit test as it takes way too long (> 1 minute)
+    # Instead it might just tell you how to test with real data
+    def test_diff_xls_and_xlsx
+      @diff = SwissmedicDiff.new
+      last_month = File.expand_path 'data/Packungen.xls',  File.dirname(__FILE__)
+      this_month = File.expand_path 'data/Packungen-2014.xlsx',  File.dirname(__FILE__)
+      result = @diff.diff last_month, this_month, [:atc_class, :sequence_date]
+      assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
+      assert(result.news.first.index('00275'), "Should find 00275 in news")
+      assert(result.news.first.index('00277') == nil, "Should not find 00277 in news")
+      assert(result.news.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
+    end
+    
     # This is not a unit test as it takes way too long (> 1 minute)
     # Instead it might just tell you how to test with real data
     def test_real_diff
-      require 'pp'  
       @diff = SwissmedicDiff.new
       last_month = File.expand_path 'data/Packungen-2013.08.16.xls',  File.dirname(__FILE__)
       this_month = File.expand_path 'data/Packungen-2013.11.04.xls',  File.dirname(__FILE__)
       result = @diff.diff last_month, this_month, [:atc_class, :sequence_date]
-      pp result.news.first
-      pp result.news.last
-      pp result.updates.first
-      pp result.replacements.first
-#      assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
-#      assert(result.news.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
-#      assert(result.news.flatten.index('00277') == nil, "Should not find 00277 in news")
-      pp result.news.size
-      pp result.updates.size
-      pp result.replacements.size
+      assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
+      assert(result.news.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
+      assert(result.news.flatten.index('00277') == nil, "Should not find 00277 in news")
     end if false
-    
+
     def test_iterate
       diff = SwissmedicDiff.new
       strings = []
