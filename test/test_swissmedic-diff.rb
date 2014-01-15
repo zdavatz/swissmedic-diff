@@ -26,19 +26,67 @@ module ODDB
                                 File.dirname(__FILE__)
       @workbook = Spreadsheet.open(@data)
     end
-    # This is not a unit test as it takes way too long (> 1 minute)
-    # Instead it might just tell you how to test with real data
+    
     def test_diff_xls_and_xlsx
       @diff = SwissmedicDiff.new
-      last_month = File.expand_path 'data/Packungen.xls',  File.dirname(__FILE__)
-      this_month = File.expand_path 'data/Packungen-2014.xlsx',  File.dirname(__FILE__)
+      last_month = File.expand_path 'data/Packungen_2013_small.xls',  File.dirname(__FILE__)
+      this_month = File.expand_path 'data/Packungen_2014_small.xlsx',  File.dirname(__FILE__)
       result = @diff.diff last_month, this_month, [:atc_class, :sequence_date]
       assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
-      assert(result.news.first.index('00275'), "Should find 00275 in news")
-      assert(result.news.first.index('00277') == nil, "Should not find 00277 in news")
+      # puts "Got #{result.news.size} news, #{result.changes.size} changes, #{result.updates.size} updates."
+      assert_equal(8, result.news.size)
+      assert_equal(3, result.changes.size)
+      assert_equal(1, result.updates.size)
+      assert(result.news.first.index('00280'), "Should find 00280 in news")
+      assert(result.news.flatten.index('65034'), "Should find 65034 in news")
+      assert(result.news.flatten.index('00277') == nil, "Should not find 00277 in news")
       assert(result.news.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
     end
+
+    def test_date_xls
+      tbook = Spreadsheet.open(File.expand_path('data/Packungen.xls',  File.dirname(__FILE__)))
+      sheet = tbook.worksheet(0)
+      assert_equal(nil, sheet.row(0)[8]) # sequence_date
+      assert_equal(2010, sheet.row(4).date(8).year)
+      assert_equal(26, sheet.row(4).date(8).day)
+      # assert_equal(26, Spreadsheet.date_cell(sheet.row(4), 8))
+      assert_equal(26, Spreadsheet.date_cell(sheet.row(4), 8).day)
+      assert_equal(2010, Spreadsheet.date_cell(sheet.row(4), 8).year)
+    end
     
+    def test_date_xlsx
+      tbook = Spreadsheet.open(File.expand_path('data/Packungen_2014_small.xlsx',  File.dirname(__FILE__)))
+      sheet = tbook.worksheet(0)
+      # sheet = RubyXL::Parser.parse(File.expand_path(File.expand_path 'data/Packungen_2014_small.xlsx',  File.dirname(__FILE__)))[0]
+      assert_equal(nil, sheet.row(0)[8]) # sequence_date
+      assert_equal(2010, sheet.row(4).date(8).year)
+      assert_equal(26, sheet.row(4).date(8).day)
+      assert_equal(26, Spreadsheet.date_cell(sheet.row(4), 8).day)
+      assert_equal(2010, Spreadsheet.date_cell(sheet.row(4), 8).year)
+    end
+
+    def test_diff_xlsx_and_xls
+      @diff = SwissmedicDiff.new
+      last_month = File.expand_path 'data/Packungen_2014_small.xlsx',  File.dirname(__FILE__)
+      this_month = File.expand_path 'data/Packungen.xls',  File.dirname(__FILE__)
+      result = @diff.diff last_month, this_month, [:atc_class, :sequence_date]
+      assert_equal(7, result.news.size)
+      assert_equal(2, result.updates.size)
+      assert_equal(10, result.changes.size)
+      assert(result.changes.flatten.index('00275'), "Should find 00275 in changes")
+      assert(result.changes.flatten.index('00277'), "Should find 00277 in changes")
+      assert(result.news.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
+    end
+    def test_diff_xlsx_and_xlsx
+      @diff = SwissmedicDiff.new
+      last_month = File.expand_path 'data/Packungen_2014_small.xlsx',  File.dirname(__FILE__)
+      this_month = File.expand_path 'data/Packungen_2014_small.xlsx',  File.dirname(__FILE__)
+      result = @diff.diff last_month, this_month, [:atc_class, :sequence_date]
+      assert_equal({}, result.changes)
+      assert_equal([], result.news)
+      assert_equal([], result.updates)
+    end
+
     # This is not a unit test as it takes way too long (> 1 minute)
     # Instead it might just tell you how to test with real data
     def test_real_diff

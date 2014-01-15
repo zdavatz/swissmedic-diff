@@ -5,6 +5,10 @@
 require 'ostruct'
 require 'spreadsheet'
 require 'rubyXL'
+require 'pp'
+
+# add some monkey patches for Spreadsheet and rubyXL
+require File.join(File.dirname(__FILE__), 'compatibility.rb')
 
 #= diff command (compare two xls fles) for swissmedic xls file.
 #
@@ -96,11 +100,7 @@ class SwissmedicDiff
       @diff.changes = changes = {}
       @diff.newest_rows = newest_rows
       Spreadsheet.client_encoding = 'UTF-8'
-      if File.extname(target).eql?('.xlsx')
-        tbook = RubyXL::Parser.parse(File.expand_path(target))
-      else
-        tbook = Spreadsheet.open(target)
-      end
+      tbook = Spreadsheet.open(target)
       sheet = tbook.worksheet(0)
       if new_column = cell(sheet.row(2), COLUMNS.size)
         raise "New column #{COLUMNS.size} (#{new_column})"
@@ -181,11 +181,7 @@ class SwissmedicDiff
       [known_regs, known_seqs, known_pacs, newest_rows]
     end
     def _known_data(latest, known_regs, known_seqs, known_pacs, newest_rows)
-      if File.extname(latest).eql?('.xlsx')
-        lbook = RubyXL::Parser.parse(File.expand_path(latest)).worksheets[0]
-      else
-        lbook = Spreadsheet.open(latest)
-      end
+      lbook = Spreadsheet.open(latest)
       idx, prr, prp = nil
       multiples = {}
       each_valid_row(lbook) { |row|
@@ -222,6 +218,8 @@ class SwissmedicDiff
       COLUMNS.each_with_index { |key, idx|
         if(!ignore.include?(key) \
            && _comparable(key, row, idx) != _comparable(key, other, idx))
+          # binding.pry if key == :expiry_date
+
           flags.push key
         end
       }
@@ -273,7 +271,7 @@ class SwissmedicDiff
       if cell = row[idx]
         case key
         when :registration_date, :expiry_date
-          row[idx]
+          Spreadsheet.date_cell(row, idx)
         when :seqnr
           sprintf "%02i", cell.to_i
         else
@@ -297,11 +295,7 @@ class SwissmedicDiff
     #return  ::
     def each_valid_row(spreadsheet)
       skipRows = rows_to_skip(spreadsheet)
-      if spreadsheet.class.eql?(RubyXL::Worksheet)
-        worksheet = spreadsheet
-      else
-        worksheet = spreadsheet.worksheet(0)
-      end
+      worksheet = spreadsheet.worksheet(0)
       row_nr = 0
       worksheet.each() {
         |row|
@@ -323,11 +317,7 @@ class SwissmedicDiff
       # Packungen.xls of swissmedic before October 2013 had  3 leading rows
       # Packungen.xls of swissmedic after  October 2013 have 4 leading rows
       j = 0
-      if spreadsheet.class.eql?(RubyXL::Worksheet)
-        j += 1 while spreadsheet[j][0] and spreadsheet[j][0].value.to_i == 0
-      else
-        j += 1 while spreadsheet.worksheet(0).row(j)[0].to_i == 0
-      end
+      j += 1 while spreadsheet.worksheet(0).row(j)[0].to_i == 0
       j
     end
     
