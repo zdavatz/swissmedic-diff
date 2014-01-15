@@ -17,7 +17,7 @@ spec = Gem::Specification.new do |s|
    s.executables << 'swissmedic-diff'
    s.add_dependency('rubyXL')
    s.add_dependency('nokogiri')
-   s.add_dependency('rubyzip')
+   s.add_dependency('rubyzip', '0.9.9')
    s.add_dependency('spreadsheet')
    s.add_development_dependency "hoe"
    s.add_development_dependency "minitest"
