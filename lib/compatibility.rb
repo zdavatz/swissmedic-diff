@@ -26,18 +26,28 @@ module Spreadsheet
       row.at(idx) && row.date(idx)
     else
       data = row[idx]
-      return Date.new(1899,12,30)+data.value.to_i if data.is_a?(RubyXL::Cell)
+      if data.is_a?(RubyXL::Cell)
+        return data.value.respond_to?(:to_i) ? data.value.to_i : data.value
+        return data.value if data.value.is_a?(DateTime)
+        if data.value.class.to_s == 'DateTime'
+          puts "data is_a RubyXL::Cell and value #{data.value.class} is_a? Date #{data.value.is_a?(Date)} DateTime #{data.value.is_a?(DateTime)}"
+          return Date.new(1899,12,30)+data.to_date.value.to_i
+        else
+          return Date.new(1899,12,30)+data.value.to_i if data.is_a?(RubyXL::Cell)
+        end
+      end
     end
   end
 end
 
 module RubyXL
-  class Worksheet < PrivateClass
+  class Worksheet
     def row(row_index)
       x = @sheet_data[row_index]
       def x.date(column_index)
         data = self[column_index]
-        return Date.new(1899,12,30)+data.value.to_i if data.is_a?(RubyXL::Cell)
+        return data.value.respond_to?(:to_i) ? data.value.to_i : data.value
+        # return Date.new(1899,12,30)+data.value.to_i if data.is_a?(RubyXL::Cell)
       end unless defined?(x.date)
       x
     end
@@ -47,9 +57,14 @@ module RubyXL
       self[idx]
     end
   end
+  class Row < OOXMLObject
+    def []=(ind, value)
+      cells[ind] = value
+    end
+  end
   class Cell
     def to_i
-      self.value.to_i
+      self.value.respond_to?(:to_i) ? self.value.to_i : self.value
     end
     def to_s
       self.value.to_s

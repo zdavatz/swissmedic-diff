@@ -301,7 +301,7 @@ class SwissmedicDiff
         |row|
         row_nr += 1
         next if row_nr <= skipRows
-        if row.size < COLUMNS.size/2 || row.select{|val| val==nil}.size > COLUMNS.size/2
+        if row.size < COLUMNS.size/2
           $stdout.puts "Data missing in \n(line " + (row_nr).to_s + "): " + row.join(", ").to_s + "\n"
           next
         end
@@ -317,7 +317,12 @@ class SwissmedicDiff
       # Packungen.xls of swissmedic before October 2013 had  3 leading rows
       # Packungen.xls of swissmedic after  October 2013 have 4 leading rows
       j = 0
-      j += 1 while spreadsheet.worksheet(0).row(j)[0].to_i == 0
+      while true
+        cell = spreadsheet.worksheet(0).row(j)[0]
+        cell = cell.value if cell.is_a?(RubyXL::Cell)
+        break if cell.respond_to?(:to_i) and cell.to_i != 0
+        j += 1
+      end
       j
     end
     

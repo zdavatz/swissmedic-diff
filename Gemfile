@@ -8,4 +8,4 @@ end
 
 group :debugger do
   gem 'pry-debugger'
-end
+end unless RUBY_VERSION =~ /^1\.8/
