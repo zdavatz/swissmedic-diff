@@ -67,7 +67,7 @@ module ODDB
 
     def test_diff_xlsx_and_xls
       @diff = SwissmedicDiff.new
-      last_month = File.expand_path 'data/Packungen_2014_small.xlsx',  File.dirname(__FILE__)
+      last_month = File.expand_path 'data/Packungen_2014_01.xlsx',  File.dirname(__FILE__)
       this_month = File.expand_path 'data/Packungen.xls',  File.dirname(__FILE__)
       result = @diff.diff last_month, this_month, [:atc_class, :sequence_date]
       assert_equal(7, result.news.size)
