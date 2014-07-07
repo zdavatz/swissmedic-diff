@@ -1,3 +1,7 @@
+=== 0.1.8 / 07.07.2014
+
+* Support parsing xlsx of Swissmedic July
+
 === 0.1.7 / 15.01.2014
 
 * Support comparing xls and xslx files
