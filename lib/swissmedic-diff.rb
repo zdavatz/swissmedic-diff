@@ -19,11 +19,11 @@ require File.join(File.dirname(__FILE__), 'compatibility.rb')
 #Authors::   Hannes Wyss (hwyss@ywesee.com), Masaomi Hatakeyama (mhatakeyama@ywesee.com)
 #Version::   0.1.4 2013-10-16 commit c30af5c15f6b8101f8f84cb482dfd09ab20729d6
 #Copyright:: Copyright (C) ywesee GmbH, 2010. All rights reserved.
-#License::   GPLv2.0 Compliance 
+#License::   GPLv2.0 Compliance
 #Source::    http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 class SwissmedicDiff
   module Diff
-    COLUMNS = [ :iksnr, :seqnr, :name_base, :company, 
+    COLUMNS = [ :iksnr, :seqnr, :name_base, :company,
                 :index_therapeuticus, :atc_class, :production_science,
                 :registration_date, :sequence_date, :expiry_date, :ikscd,
                 :size, :unit, :ikscat, :substances, :composition,
@@ -102,9 +102,6 @@ class SwissmedicDiff
       Spreadsheet.client_encoding = 'UTF-8'
       tbook = Spreadsheet.open(target)
       sheet = tbook.worksheet(0)
-      if new_column = cell(sheet.row(2), COLUMNS.size)
-        raise "New column #{COLUMNS.size} (#{new_column})"
-      end
       idx, prr, prp = nil
       multiples = {}
       each_valid_row(tbook) { |row|
@@ -137,7 +134,7 @@ class SwissmedicDiff
           (changes[iksnr].concat flags).uniq!
           updates.push row unless flags.empty?
         else
-          replacements.store [ iksnr, seqnr, cell(row, column(:size)), 
+          replacements.store [ iksnr, seqnr, cell(row, column(:size)),
                                 cell(row, column(:unit)) ], row
           flags = changes[iksnr]
           flags.push(:sequence).uniq! unless(flags.include? :new)
@@ -146,7 +143,7 @@ class SwissmedicDiff
       }
       @diff.replacements = reps = {}
       known_pacs.each { |(iksnr, pacnr), row|
-        key = [iksnr, '%02i' % cell(row, column(:seqnr)).to_i, 
+        key = [iksnr, '%02i' % cell(row, column(:seqnr)).to_i,
                       cell(row, column(:size)), cell(row, column(:unit))]
         if(rep = replacements[key])
           changes[iksnr].push :replaced_package
@@ -157,7 +154,7 @@ class SwissmedicDiff
       changes.delete_if { |iksnr, flags| flags.empty? }
       @diff.package_deletions = known_pacs.collect { |key, row|
         ## the keys in known_pacs don't include the sequence number (which
-        #  would prevent us from properly recognizing multi-sequence-Packages), 
+        #  would prevent us from properly recognizing multi-sequence-Packages),
         #  so we need complete the path to the package now
         key[1,0] = '%02i' % cell(row, column(:seqnr)).to_i
         key
@@ -205,7 +202,7 @@ class SwissmedicDiff
         known_regs.store [iksnr], row
         known_seqs.store [iksnr, seqnr], row
         known_pacs.store [iksnr, pacnr, idx], row
-        (newest_rows[iksnr] ||= {})[pacnr] = row                            
+        (newest_rows[iksnr] ||= {})[pacnr] = row
       }
     end
     def name(diff, iksnr)
@@ -236,7 +233,7 @@ class SwissmedicDiff
     def to_s(sort=:group)
       @diff ||= nil
       return '' unless @diff
-      @diff.changes.sort_by { |iksnr, flags| 
+      @diff.changes.sort_by { |iksnr, flags|
         _sort_by(sort, iksnr, flags)
       }.collect { |iksnr, flags|
         if(flags.include? :new)
@@ -245,7 +242,7 @@ class SwissmedicDiff
           "- " << describe(@diff, iksnr)
         else
           "> " << describe(@diff, iksnr) << "; " \
-            << flags.collect { |flag| describe_flag(@diff, iksnr, flag) 
+            << flags.collect { |flag| describe_flag(@diff, iksnr, flag)
           }.compact.join(", ")
         end
       }.join("\n")
@@ -279,7 +276,7 @@ class SwissmedicDiff
         end
       end
     end
-  
+
     #=== iterate over all valid rows of a swissmedic Packungen.xls
     #
     # Iterates over all rows, ignoring Tierarzneimittel and
@@ -312,7 +309,7 @@ class SwissmedicDiff
         yield row
       }
     end
-    
+
     def rows_to_skip(spreadsheet)
       # Packungen.xls of swissmedic before October 2013 had  3 leading rows
       # Packungen.xls of swissmedic after  October 2013 have 4 leading rows
@@ -325,7 +322,7 @@ class SwissmedicDiff
       end
       j
     end
-    
+
   end
   include Diff
 end

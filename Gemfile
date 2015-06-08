@@ -7,5 +7,10 @@ group :development do
 end
 
 group :debugger do
-  gem 'pry-debugger'
+  if RUBY_VERSION.match(/^1/)
+    gem 'pry-debugger'
+  else
+    gem 'pry-byebug'
+  end
 end unless RUBY_VERSION =~ /^1\.8/
+

@@ -1,3 +1,7 @@
+=== 0.1.9 / 08.06.2015
+
+* Swissmedic has different header lines
+
 === 0.1.8 / 07.07.2014
 
 * Support parsing xlsx of Swissmedic July

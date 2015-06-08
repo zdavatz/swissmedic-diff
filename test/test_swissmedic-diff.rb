@@ -35,8 +35,8 @@ module ODDB
       assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
       # puts "Got #{result.news.size} news, #{result.changes.size} changes, #{result.updates.size} updates."
       assert_equal(8, result.news.size)
-      assert_equal(3, result.changes.size)
-      assert_equal(1, result.updates.size)
+      assert_equal(4, result.changes.size)
+      assert_equal(2, result.updates.size)
       assert(result.news.first.index('00280'), "Should find 00280 in news")
       assert(result.news.flatten.index('65034'), "Should find 65034 in news")
       assert(result.news.flatten.index('00277') == nil, "Should not find 00277 in news")
@@ -79,25 +79,13 @@ module ODDB
     end
     def test_diff_xlsx_and_xlsx
       @diff = SwissmedicDiff.new
-      last_month = File.expand_path 'data/Packungen_2014_small.xlsx',  File.dirname(__FILE__)
+      last_month = File.expand_path 'data/Packungen_2014_01.xlsx',  File.dirname(__FILE__)
       this_month = File.expand_path 'data/Packungen_2014_small.xlsx',  File.dirname(__FILE__)
       result = @diff.diff last_month, this_month, [:atc_class, :sequence_date]
-      assert_equal({}, result.changes)
+      assert_equal({"00277"=>[:expiry_date, :indication_sequence]}, result.changes)
+      assert_equal(1, result.updates.size)
       assert_equal([], result.news)
-      assert_equal([], result.updates)
     end
-
-    # This is not a unit test as it takes way too long (> 1 minute)
-    # Instead it might just tell you how to test with real data
-    def test_real_diff
-      @diff = SwissmedicDiff.new
-      last_month = File.expand_path 'data/Packungen-2013.08.16.xls',  File.dirname(__FILE__)
-      this_month = File.expand_path 'data/Packungen-2013.11.04.xls',  File.dirname(__FILE__)
-      result = @diff.diff last_month, this_month, [:atc_class, :sequence_date]
-      assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
-      assert(result.news.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
-      assert(result.news.flatten.index('00277') == nil, "Should not find 00277 in news")
-    end if false
 
     def test_iterate
       diff = SwissmedicDiff.new
@@ -187,9 +175,8 @@ module ODDB
       assert_equal '005', result.replacements.values.first
     end
     def test_diff_error_column
-      assert_raises(RuntimeError) { 
-        @diff.diff(@data_error_column, @older)
-      }
+      res = @diff.diff(@data_error_column, @older)
+      assert_equal(OpenStruct, res.class)
     end
 
     # if row.size < COLUMNS.size/2
