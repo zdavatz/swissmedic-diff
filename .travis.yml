@@ -1,6 +1,6 @@
 language: ruby
-before_install:
-  - gem install bundler
+cache: bundler
+bundler_args: --without debugger
 
 notifications:
   email:
