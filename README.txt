@@ -29,7 +29,7 @@ Then you can get the version 0.1.2.
 
 == REQUIREMENTS:
 
-* ruby 1.8 (with oniguruma patch) or ruby 1.9
+* ruby 1.9, ruby 2.x
 * spreadsheet
 
 == INSTALL:
@@ -62,6 +62,7 @@ Usage: /usr/bin/swissmedic-diff [-gnr] <file1> <file2> [<output>]
   * Hannes Wyss <hwyss@ywesee.com>
   * Masaomi Hatakeyama <mhatakeyama@ywesee.com>
   * Zeno R.R. Davatz <zdavatz@ywesee.com>
+  * Niklaus Giger <ngiger@ywesee.com>
 
 == LICENSE:
 
