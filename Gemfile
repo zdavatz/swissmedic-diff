@@ -11,6 +11,6 @@ group :debugger do
     gem 'pry-debugger'
   else
     gem 'pry-byebug'
+    gem 'pry-doc'
   end
 end unless RUBY_VERSION =~ /^1\.8/
-

@@ -1,3 +1,10 @@
+=== 0.2.0 / 03.07.2015
+
+* Abort if Swissmedic introduces incompatible header lines
+* Support new format of SwissMedic July 2015
+* Reworked compating xlsx-files
+* Remove support for old .xls-format (used before 2013)
+
 === 0.1.9 / 08.06.2015
 
 * Swissmedic has different header lines

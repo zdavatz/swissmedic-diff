@@ -1,2 +1,9 @@
 tags
 *.swp
+pkg
+.*#
+.bundle
+.ruby-version
+*.patch
+InstalledFiles
+SetupConfig

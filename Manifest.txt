@@ -13,12 +13,8 @@ lib/swissmedic-diff.rb
 lib/version.rb
 setup.rb
 swissmedic-diff.gemspec
-test/data/Packungen-2013.10.14.xls
-test/data/Packungen.older.xls
-test/data/Packungen.xls
-test/data/Packungen_2013_small.xls
-test/data/Packungen_2014_small.xlsx
-test/data/Packungen_error_column.xls
-test/data/Packungen_error_missing1.xls
-test/data/Packungen_error_missing2.xls
+test/data/Packungen-2014.01.01.xlsx
+test/data/Packungen-2014.02.01.xlsx
+test/data/Packungen-2015.06.04.xlsx
+test/data/Packungen-2015.07.02.xlsx
 test/test_swissmedic-diff.rb
