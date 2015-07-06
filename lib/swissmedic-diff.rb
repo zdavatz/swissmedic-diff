@@ -148,25 +148,25 @@ class SwissmedicDiff
       tbook = Spreadsheet.open(target)
       idx, prr, prp = nil
       multiples = {}
-      latest_keys = get_column_indices(Spreadsheet.open(latest)).keys
-      target_keys = get_column_indices(tbook).keys
+      @latest_keys = get_column_indices(Spreadsheet.open(latest)).keys
+      @target_keys = get_column_indices(tbook).keys
       each_valid_row(tbook) { |row|
-        iksnr = cell(row, target_keys.index(:iksnr))
-        seqnr = cell(row, target_keys.index(:seqnr))
-        pacnr = cell(row, target_keys.index(:ikscd))
+        iksnr = cell(row, @target_keys.index(:iksnr))
+        seqnr = cell(row, @target_keys.index(:seqnr))
+        pacnr = cell(row, @target_keys.index(:ikscd))
         (multiples[iksnr] ||= {})
         if prr == iksnr && prp == pacnr
           idx += 1
         elsif previous = multiples[iksnr][pacnr]
           prr = iksnr
           prp = pacnr
-          idx = previous[target_keys.size].to_i + 1
+          idx = previous[@target_keys.size].to_i + 1
         else
           prr = iksnr
           prp = pacnr
           idx = 0
         end
-        row[target_keys.size] = idx
+        row[@target_keys.size] = idx
         (newest_rows[iksnr] ||= {})[pacnr] = row
         multiples[iksnr][pacnr] = row
         if(other = known_regs.delete([iksnr]))
@@ -176,12 +176,12 @@ class SwissmedicDiff
         end
         known_seqs.delete([iksnr, seqnr])
         if(other = known_pacs.delete([iksnr, pacnr, idx]))
-          flags = rows_diff(row, target_keys, other, latest_keys, ignore)
+          flags = rows_diff(row, other, ignore)
           (changes[iksnr].concat flags).uniq!
           updates.push row unless flags.empty?
         else
-          replacements.store [ iksnr, seqnr, cell(row, target_keys.index(:size)),
-                                cell(row, target_keys.index(:unit)) ], row
+          replacements.store [ iksnr, seqnr, cell(row, @target_keys.index(:size)),
+                                cell(row, @target_keys.index(:unit)) ], row
           flags = changes[iksnr]
           flags.push(:sequence).uniq! unless(flags.include? :new)
           news.push row
@@ -189,8 +189,8 @@ class SwissmedicDiff
       }
       @diff.replacements = reps = {}
       known_pacs.each { |(iksnr, pacnr), row|
-        key = [iksnr, '%02i' % cell(row, target_keys.index(:seqnr)).to_i,
-                      cell(row, target_keys.index(:size)), cell(row, target_keys.index(:unit))]
+        key = [iksnr, '%02i' % cell(row, @target_keys.index(:seqnr)).to_i,
+                      cell(row, @target_keys.index(:size)), cell(row, @target_keys.index(:unit))]
         if(rep = replacements[key])
           changes[iksnr].push :replaced_package
           reps.store rep, pacnr
@@ -202,7 +202,7 @@ class SwissmedicDiff
         ## the keys in known_pacs don't include the sequence number (which
         #  would prevent us from properly recognizing multi-sequence-Packages),
         #  so we need complete the path to the package now
-        key[1,0] = '%02i' % cell(row, target_keys.index(:seqnr)).to_i
+        key[1,0] = '%02i' % cell(row, @target_keys.index(:seqnr)).to_i
         key
       }
       @diff.sequence_deletions = known_seqs.keys
@@ -225,27 +225,27 @@ class SwissmedicDiff
     end
     def _known_data(latest, known_regs, known_seqs, known_pacs, newest_rows)
       lbook = Spreadsheet.open(latest)
+      @latest_keys = get_column_indices(lbook).keys
       idx, prr, prp = nil
       multiples = {}
-      latest_keys = get_column_indices(lbook).keys
       each_valid_row(lbook) { |row|
-        iksnr = cell(row, latest_keys.index(:iksnr))
-        seqnr = cell(row, latest_keys.index(:seqnr))
-        pacnr = cell(row, latest_keys.index(:ikscd))
+        iksnr = cell(row, @latest_keys.index(:iksnr))
+        seqnr = cell(row, @latest_keys.index(:seqnr))
+        pacnr = cell(row, @latest_keys.index(:ikscd))
         multiples[iksnr] ||= {}
         if prr == iksnr && prp == pacnr
           idx += 1
         elsif previous = multiples[iksnr][pacnr]
           prr = iksnr
           prp = pacnr
-          idx = previous[latest_keys.size].to_i + 1
+          idx = previous[@latest_keys.size].to_i + 1
         else
           prr = iksnr
           prp = pacnr
           idx = 0
         end
         multiples[iksnr][pacnr] = row
-        row[latest_keys.size] = idx
+        row[@latest_keys.size] = idx
         known_regs.store [iksnr], row
         known_seqs.store [iksnr, seqnr], row
         known_pacs.store [iksnr, pacnr, idx], row
@@ -257,13 +257,15 @@ class SwissmedicDiff
       row = rows.sort.first.last
       cell(row, COLUMNS_2014.keys.index(:name_base))
     end
-    def rows_diff(row, row_keys, other, other_keys, ignore = [])
+    def rows_diff(row, other, ignore = [])
       flags = []
       COLUMNS_OLD.each_with_index {
         |key, idx|
         if !ignore.include?(key)
-          left  = _comparable(key, row,   row_keys.index(key))
-          right = _comparable(key, other, other_keys.index(key))
+      @latest_keys.index(key)
+      @target_keys.index(key)
+          left  = _comparable(key, row,   @target_keys.index(key))
+          right = _comparable(key, other, @latest_keys.index(key))
           if left != right
             puts "Pushing key #{key}: '#{left.inspect}' != '#{right.inspect}'" if $VERBOSE
             flags.push key
@@ -320,7 +322,7 @@ class SwissmedicDiff
         when :registration_date, :expiry_date
           Spreadsheet.date_cell(row, idx)
         when :seqnr
-          sprintf "%02i", cell.to_i
+          sprintf "%02i", cell(row, idx).to_i
         else
           cell(row, idx).downcase.gsub(/\s+/, "")
         end

@@ -1,3 +1,7 @@
+=== 0.2.1 / 06.07.2015
+
+* Revert nr of paramenters of diff method to previous version, to make oddb.org happy again
+
 === 0.2.0 / 03.07.2015
 
 * Abort if Swissmedic introduces incompatible header lines

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    swissmedic-diff (0.2.0)
+    swissmedic-diff (0.2.1)
       nokogiri
       rubyXL (= 3.3.1)
       rubyzip
