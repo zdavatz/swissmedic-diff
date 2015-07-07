@@ -23,10 +23,10 @@ module ODDB
       result = @diff.diff this_month, last_month, [:atc_class, :sequence_date]
       assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
       assert_equal(1, result.news.size)
-      assert_equal(2, result.changes.size)
-      assert_equal(1, result.updates.size)
+      assert_equal(1, result.changes.size)
+      assert_equal(0, result.updates.size)
       assert_equal(['65838'], result.news.collect{|x| x[0] if x[0] == '65838'})
-      assert_equal({"65837"=>[:indication_sequence], "65838"=>[:new]}, result.changes)
+      assert_equal({"65838"=>[:new]}, result.changes)
     end
 
     def test_diff_wrong_header
@@ -37,21 +37,11 @@ module ODDB
     end
 
 
-    def test_date_xlsx
-      tbook = Spreadsheet.open(@january_2014)
-      sheet = tbook.worksheet(0)
-      assert_equal(nil, sheet.row(0)[8]) # sequence_date
-      assert_equal(2010, sheet.row(4).date(8).year)
-      assert_equal(26, sheet.row(4).date(8).day)
-      assert_equal(26, Spreadsheet.date_cell(sheet.row(4), 8).day)
-      assert_equal(2010, Spreadsheet.date_cell(sheet.row(4), 8).year)
-    end
-
     def test_diff_xlsx_and_xlsx
       result = @diff.diff @february_2014, @january_2014, [:atc_class, :sequence_date]
       assert_equal 4, result.news.size
       expected = {
-          "00277"=>[:name_base, :expiry_date, :indication_sequence],
+          "00277"=>[:name_base],
           "65040"=>[:sequence, :replaced_package],
           "60125"=>[:new],
           "61367"=>[:new],
@@ -106,14 +96,14 @@ module ODDB
 + 60125: Otriduo Schnupfen, Dosierspray
 + 61367: Hypericum-Mepha 250, Lactab
 - 00274: Cardio-Pulmo-Rénal Sérocytol, suppositoire
-> 00277: Coeur-Vaisseaux Sérocytol, Namensänderung; Namensänderung (Coeur-Vaisseaux Sérocytol, Namensänderung), Ablaufdatum der Zulassung (25.04.2020), Anwendungsgebiet Sequenz ()
+> 00277: Coeur-Vaisseaux Sérocytol, Namensänderung; Namensänderung (Coeur-Vaisseaux Sérocytol, Namensänderung)
 > 00278: Colon Sérocytol, suppositoire; ATC-Code (J06AA)
 > 00279: Conjonctif Sérocytol, suppositoire; ATC-Code (D03AX04)
 > 65040: Panthoben, Salbe; Packungs-Nummer (001 -> 003)
       EOS
       assert_equal <<-EOS.strip, @diff.to_s(:name)
 - 00274: Cardio-Pulmo-Rénal Sérocytol, suppositoire
-> 00277: Coeur-Vaisseaux Sérocytol, Namensänderung; Namensänderung (Coeur-Vaisseaux Sérocytol, Namensänderung), Ablaufdatum der Zulassung (25.04.2020), Anwendungsgebiet Sequenz ()
+> 00277: Coeur-Vaisseaux Sérocytol, Namensänderung; Namensänderung (Coeur-Vaisseaux Sérocytol, Namensänderung)
 > 00278: Colon Sérocytol, suppositoire; ATC-Code (J06AA)
 > 00279: Conjonctif Sérocytol, suppositoire; ATC-Code (D03AX04)
 + 61367: Hypericum-Mepha 250, Lactab
@@ -122,7 +112,7 @@ module ODDB
     EOS
       assert_equal <<-EOS.strip, @diff.to_s(:registration)
 - 00274: Cardio-Pulmo-Rénal Sérocytol, suppositoire
-> 00277: Coeur-Vaisseaux Sérocytol, Namensänderung; Namensänderung (Coeur-Vaisseaux Sérocytol, Namensänderung), Ablaufdatum der Zulassung (25.04.2020), Anwendungsgebiet Sequenz ()
+> 00277: Coeur-Vaisseaux Sérocytol, Namensänderung; Namensänderung (Coeur-Vaisseaux Sérocytol, Namensänderung)
 > 00278: Colon Sérocytol, suppositoire; ATC-Code (J06AA)
 > 00279: Conjonctif Sérocytol, suppositoire; ATC-Code (D03AX04)
 + 60125: Otriduo Schnupfen, Dosierspray

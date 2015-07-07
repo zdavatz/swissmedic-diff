@@ -21,23 +21,6 @@ module Spreadsheet
       end
     end
   end
-  def Spreadsheet.date_cell(row, idx)
-    if row.kind_of?(Spreadsheet::Excel::Row)
-      row.at(idx) && row.date(idx)
-    else
-      data = row[idx]
-      if data.is_a?(RubyXL::Cell)
-        return data.value.respond_to?(:to_i) ? data.value.to_i : data.value
-        return data.value if data.value.is_a?(DateTime)
-        if data.value.class.to_s == 'DateTime'
-          puts "data is_a RubyXL::Cell and value #{data.value.class} is_a? Date #{data.value.is_a?(Date)} DateTime #{data.value.is_a?(DateTime)}"
-          return Date.new(1899,12,30)+data.to_date.value.to_i
-        else
-          return Date.new(1899,12,30)+data.value.to_i if data.is_a?(RubyXL::Cell)
-        end
-      end
-    end
-  end
 end
 
 module RubyXL

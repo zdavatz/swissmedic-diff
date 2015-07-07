@@ -262,12 +262,12 @@ class SwissmedicDiff
       COLUMNS_OLD.each_with_index {
         |key, idx|
         if !ignore.include?(key)
-      @latest_keys.index(key)
-      @target_keys.index(key)
           left  = _comparable(key, row,   @target_keys.index(key))
           right = _comparable(key, other, @latest_keys.index(key))
+          next if left.is_a?(Date) and right.is_a?(Date) and left.start.eql?(right.start)
+          next if left.is_a?(String) and left.empty? and not right
+          next if right.is_a?(String) and right.empty? and not left
           if left != right
-            puts "Pushing key #{key}: '#{left.inspect}' != '#{right.inspect}'" if $VERBOSE
             flags.push key
           end
         end
@@ -320,7 +320,7 @@ class SwissmedicDiff
       if cell = row[idx]
         case key
         when :registration_date, :expiry_date
-          Spreadsheet.date_cell(row, idx)
+          row[idx].value.to_date
         when :seqnr
           sprintf "%02i", cell(row, idx).to_i
         else

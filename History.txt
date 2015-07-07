@@ -1,5 +1,7 @@
 === 0.2.1 / 06.07.2015
 
+* Fix problems comparing dates (using to_date.start)
+* Assume nothing has changed when comparing nil with an emtpy string
 * Revert nr of paramenters of diff method to previous version, to make oddb.org happy again
 
 === 0.2.0 / 03.07.2015
