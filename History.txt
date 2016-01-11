@@ -1,3 +1,10 @@
+=== 0.2.2 / 11.01.2016
+
+* Don't fail if date cells are nil
+* Show version of gem with -h
+* Use /usr/bin/env ruby to get actual ruby. Was fixed to outdated /usr/bin/ruby18
+* Run travis tests for ruby 2.2.3, too.
+
 === 0.2.1 / 06.07.2015
 
 * Fix problems comparing dates (using to_date.start)

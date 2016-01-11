@@ -320,7 +320,7 @@ class SwissmedicDiff
       if cell = row[idx]
         case key
         when :registration_date, :expiry_date
-          row[idx].value.to_date
+          row[idx] && row[idx].value ? row[idx].value.to_date : nil
         when :seqnr
           sprintf "%02i", cell(row, idx).to_i
         else
