@@ -1,4 +1,4 @@
-#! /usr/bin/ruby18
+#!/usr/bin/env ruby
 
 require 'swissmedic-diff'
 
@@ -10,6 +10,8 @@ Usage: #$0 [-gnr] [-i ignorelist] <file1> <file2> [<output>]
 -n --name          sort by name
 -r --registration  sort by registration
 -i --ignore        ignore differences in the following comma-separated keys
+
+Version of swissmedic-diff is #{SwissmedicDiff::VERSION}
   EOS
 end
 
