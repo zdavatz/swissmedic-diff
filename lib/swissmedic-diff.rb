@@ -6,6 +6,7 @@ require 'ostruct'
 require 'spreadsheet'
 require 'rubyXL'
 require 'pp'
+require File.join(File.dirname(__FILE__), 'version.rb')
 
 # add some monkey patches for Spreadsheet and rubyXL
 require File.join(File.dirname(__FILE__), 'compatibility.rb')
@@ -97,6 +98,7 @@ class SwissmedicDiff
       :atc_class                =>  'ATC-Code',
     }
     GALFORM_P = %r{excipiens\s+(ad|pro)\s+(?<galform>((?!\bpro\b)[^.])+)}
+    DATE_FORMAT = '%Y:%m:%d'
 
     def capitalize(string)
       string.split(/\s+/).collect { |word| word.capitalize }.join(' ')
@@ -264,9 +266,9 @@ class SwissmedicDiff
         if !ignore.include?(key)
           left  = _comparable(key, row,   @target_keys.index(key))
           right = _comparable(key, other, @latest_keys.index(key))
-          next if left.is_a?(Date) and right.is_a?(Date) and left.start.eql?(right.start)
-          next if left.is_a?(String) and left.empty? and not right
-          next if right.is_a?(String) and right.empty? and not left
+          next if left.is_a?(Date) && right.is_a?(Date) && left.strftime(DATE_FORMAT).eql?(right.strftime(DATE_FORMAT))
+          next if left.is_a?(String) && left.empty? && !right
+          next if right.is_a?(String) && right.empty? && !left
           if left != right
             flags.push key
           end
@@ -331,7 +333,7 @@ class SwissmedicDiff
 
     def get_column_indices(spreadsheet)
       error_2014 = nil
-      filename = spreadsheet.root.filepath
+      filename = spreadsheet.root.respond_to?(:filepath) ? spreadsheet.root.filepath : 'unknown'
       headerRowId = rows_to_skip(spreadsheet)-1
       row = spreadsheet.worksheet(0)[headerRowId]
 
