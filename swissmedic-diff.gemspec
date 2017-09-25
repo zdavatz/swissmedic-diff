@@ -15,11 +15,11 @@ spec = Gem::Specification.new do |s|
                    Dir.glob('test/data/*.xls')
    s.test_file   = "test/test_swissmedic-diff.rb"
    s.executables << 'swissmedic-diff'
-   s.add_dependency('rubyXL', '3.3.1')
+   s.add_dependency('rubyXL', '>= 3.3.1')
    s.add_dependency('nokogiri')
    s.add_dependency('rubyzip')
    s.add_dependency('spreadsheet')
-   s.add_development_dependency "hoe"
+   s.add_development_dependency "rake"
    s.add_development_dependency "minitest"
    s.add_development_dependency "minitest-reporters"
 

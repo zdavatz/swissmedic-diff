@@ -1,3 +1,8 @@
+=== 0.2.3 / 25.09.2017
+
+* Fix comparing Date cells
+* Run travis tests for ruby 2.3 and 2.4
+
 === 0.2.2 / 11.01.2016
 
 * Don't fail if date cells are nil
