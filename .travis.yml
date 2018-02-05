@@ -5,9 +5,12 @@ bundler_args: --without debugger
 notifications:
   email:
   - ngiger@ywesee.com
-  - zdavatz@ywesee.com
+
+script:
+  - bundle exec ruby test/test_swissmedic-diff.rb
 rvm:
   - ruby-head
+  - 2.5.0
   - 2.4.2
   - 2.3,4
   - 2.2.3
