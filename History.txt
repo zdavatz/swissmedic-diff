@@ -1,3 +1,8 @@
+=== 0.2.5 / 05.02.2018
+
+* Adapte to swissmedic fixing a typo for betäubunsmittel
+* Run travis tests for ruby 2.5, too
+
 === 0.2.3 / 25.09.2017
 
 * Fix comparing Date cells
