@@ -74,7 +74,8 @@ class SwissmedicDiff
         :indication_sequence => /Anwendungsgebiet Dosisstärke/i,
         :gen_production => /Gentechnisch hergestellte Wirkstoffe/i, # column-nr 20
         :insulin_category => /Kategorie bei Insulinen/i,
-        :drug_index       => /Verz. bei betäubunsmittel-haltigen Präparaten/i,
+      # swissmedi corrected in february 2018 the typo  betäubunsmittel to  betäubungsmittel-
+        :drug_index       => /Verz. bei betäubun.*smittel-haltigen Präparaten/i,
     }
 
     FLAGS = {
