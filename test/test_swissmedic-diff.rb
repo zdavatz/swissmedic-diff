@@ -42,6 +42,55 @@ module ODDB
       assert_equal(expected, result.changes)
     end
 
+
+    def test_diff_changes_february_2019
+      @diff = SwissmedicDiff.new
+      last_month = File.expand_path 'data/Packungen-2015.07.02.xlsx',  File.dirname(__FILE__)
+      this_month = File.expand_path 'data/Packungen-2019.01.31.xlsx',  File.dirname(__FILE__)
+      expected =  {"00277"=>[:name_base, :expiry_date, :production_science],
+        "15219"=>[:new],
+        "16105"=>[:new],
+        "16598"=>[:new],
+        "28486"=>[:new],
+        "30015"=>[:new],
+        "31644"=>[:new],
+        "32475"=>[:new],
+        "35366"=>[:new],
+        "43454"=>[:new],
+        "44625"=>[:new],
+        "45882"=>[:new],
+        "53290"=>[:new],
+        "53662"=>[:new],
+        "54015"=>[:new],
+        "54534"=>[:new],
+        "55558"=>[:new],
+        "66297"=>[:new],
+        "55594"=>[:new],
+        "55674"=>[:new],
+        "56352"=>[:new],
+        "58943"=>[:new],
+        "59267"=>[:new],
+        "61186"=>[:new],
+        "62069"=>[:new],
+        "62132"=>[:new],
+        "65856"=>[:new],
+        "65857"=>[:new],
+        "58734"=>[:new],
+        "55561"=>[:new],
+        "65160"=>[:new],
+        "58158"=>[:new],
+        "44447"=>[:new],
+        "39252"=>[:new],
+        "00278"=>[:delete],
+        "00279"=>[:delete],
+        "65837"=>[:delete],
+        "65838"=>[:delete]
+      }
+
+      result = @diff.diff this_month, last_month
+      assert_equal(expected, result.changes)
+    end
+
     def test_diff_wrong_header
       @diff = SwissmedicDiff.new
       last_month = File.expand_path 'data/Packungen-2015.06.04.xlsx',  File.dirname(__FILE__)

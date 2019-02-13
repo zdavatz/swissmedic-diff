@@ -53,7 +53,7 @@ class SwissmedicDiff
 
     COLUMNS_JULY_2015 = {
         :iksnr => /Zulassungs-Nummer/i,                  # column-nr: 0
-        :seqnr => /Dosisstärke-nummer/i,
+        :seqnr => /Dosis+tärke-nummer/i,
         :name_base => /Präparatebezeichnung/i,
         :company => /Zulassungsinhaberin/i,
         :production_science => /Heilmittelcode/i,
@@ -78,6 +78,33 @@ class SwissmedicDiff
         :drug_index       => /Verz. bei betäubun.*smittel-haltigen Präparaten/i,
     }
 
+    COLUMNS_FEBRUARY_2019= {
+      :iksnr => /Zulassungs-Nummer/i,                  # column-nr: 0
+      :seqnr => /Dosisstärke-nummer/i,
+      :name_base => /Bezeichnung des Arzneimittels/i,
+      :company => /Zulassungsinhaberin/i,
+      :production_science => /Heilmittelcode/i,
+      :index_therapeuticus => /IT-Nummer/i,            # column-nr: 5
+      :atc_class => /ATC-Code/i,
+      :registration_date => /Erstzul.datum Arzneimittel/i,
+      :sequence_date => /Zul.datum Dosisstärke/i,
+      :expiry_date => /Gültigkeitsdauer der Zulassung/i,
+      :ikscd => /Packungscode/i,                 # column-nr: 10
+      :size => /Packungsgrösse/i,
+      :unit => /Einheit/i,
+      :ikscat => /Abgabekategorie Packung/i,
+      :ikscat_seq => /Abgabekategorie Dosisstärke/i,
+      :ikscat_preparation => /Abgabekategorie Arzneimittel/i, # column-nr: 15
+      :substances => /Wirkstoff/i,
+      :composition => /Zusammensetzung/i,
+      :composition_AMZV => /Volldeklaration rev. AMZV umgesetzt/i,
+      :indication_registration => /Anwendungsgebiet Arzneimittel/i,
+      :indication_sequence => /Anwendungsgebiet Dosisstärke/i, # column-nr 20
+      :gen_production => /Gentechnisch hergestellte Wirkstoffe/i,
+      :insulin_category => /Kategorie bei Insulinen/i,
+      # swissmedi corrected in february 2018 the typo  betäubunsmittel to  betäubungsmittel-
+        :drug_index       => /Verz. bei betäubungsmittel-haltigen Arzneimittel/i,
+    }
     FLAGS = {
       :new                      =>  'Neues Produkt',
       :name_base                =>  'Namensänderung',
@@ -366,7 +393,33 @@ class SwissmedicDiff
         end
         return COLUMNS_JULY_2015
       end
-      raise "#{error_2015}\n#{error_2014}"
+      row = spreadsheet.worksheet(0)[5] # Headers are found at row 5 since February 5
+      error_2019 = nil
+      if spreadsheet.worksheet(0)[5].size != COLUMNS_FEBRUARY_2019.size
+        raise "#{error_2015}\n#{error_2014}"
+      else
+        0.upto((COLUMNS_FEBRUARY_2019.size) -1).each{ |idx| puts "#{idx}: #{row[idx].value}" }  if $VERBOSE
+        COLUMNS_FEBRUARY_2019.each{
+          |key, value|
+          header_name = row[COLUMNS_FEBRUARY_2019.keys.index(key)].value.to_s
+          unless value.match(header_name)
+            puts "#{__LINE__}: #{key} ->  #{COLUMNS_FEBRUARY_2019.keys.index(key)} #{value}\nbut was  #{header_name}" if $VERBOSE
+            error_2019 = "Packungen.xlslx_has_unexpected_column_#{COLUMNS_FEBRUARY_2019.keys.index(key)}_#{key}_#{value.to_s}_but_was_#{header_name}"
+            require 'pry'; binding.pry
+          break
+          end
+        }
+        unless error_2015
+          idx14 = COLUMNS_2014.keys.index(:name_base)
+          idx15 = COLUMNS_2014.keys.index(:name_base)
+          if (idx14 != idx15)
+            raise ":name_base must be same index in COLUMNS_JULY_2015 and COLUMNS_2014. Is #{idx14} and #{idx15}"
+          end
+          return COLUMNS_FEBRUARY_2019
+        end
+        raise "#{error_2019}" if error_2019
+     end
+     COLUMNS_FEBRUARY_2019
     end
     #=== iterate over all valid rows of a swissmedic Packungen.xls
     #

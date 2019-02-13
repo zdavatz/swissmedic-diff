@@ -1,3 +1,7 @@
+=== 0.2.6 / 13.02.2019
+
+* Adapt to swissmedic new XLSX files
+
 === 0.2.5 / 05.02.2018
 
 * Adapte to swissmedic fixing a typo for betäubunsmittel
