@@ -1,3 +1,7 @@
+=== 0.2.7 / 13.03.2019
+
+* Set date to nil when expiration_date is a string 'Unbegrenzt'
+
 === 0.2.6 / 13.02.2019
 
 * Adapt to swissmedic new XLSX files

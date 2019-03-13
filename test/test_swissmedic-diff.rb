@@ -22,11 +22,11 @@ module ODDB
       this_month = File.expand_path 'data/Packungen-2015.07.02.xlsx',  File.dirname(__FILE__)
       result = @diff.diff this_month, last_month, [:atc_class, :sequence_date]
       assert(result.changes.flatten.index('Zulassungs-Nummer') == nil, "Should not find Zulassungs-Nummer in changes")
-      assert_equal(1, result.news.size)
-      assert_equal(3, result.changes.size)
+      assert_equal(2, result.news.size)
+      assert_equal(4, result.changes.size)
       assert_equal(4, result.updates.size)
-      assert_equal(['65838'], result.news.collect{|x| x[0] if x[0] == '65838'})
-      assert_equal({"00277"=>[:name_base, :expiry_date], "00279"=>[:expiry_date], "65838"=>[:new]}, result.changes)
+      assert_equal(['65838', nil], result.news.collect{|x| x[0] if x[0] == '65838'})
+      assert_equal({"00277"=>[:name_base, :expiry_date], "00279"=>[:expiry_date], "65838"=>[:new], "15219"=>[:new]}, result.changes)
     end
 
     def test_diff_changes
@@ -34,9 +34,10 @@ module ODDB
       last_month = File.expand_path 'data/Packungen-2015.06.04.xlsx',  File.dirname(__FILE__)
       this_month = File.expand_path 'data/Packungen-2015.07.02.xlsx',  File.dirname(__FILE__)
       expected = {
-        "00277"=>[:name_base, :expiry_date],
-        "00279"=>[:expiry_date],
-        "65838"=>[:new]
+          "00277"=>[:name_base, :expiry_date],
+          "00279"=>[:expiry_date],
+          "65838"=>[:new],
+          "15219"=>[:new]
       }
       result = @diff.diff this_month, last_month
       assert_equal(expected, result.changes)
@@ -46,9 +47,9 @@ module ODDB
     def test_diff_changes_february_2019
       @diff = SwissmedicDiff.new
       last_month = File.expand_path 'data/Packungen-2015.07.02.xlsx',  File.dirname(__FILE__)
-      this_month = File.expand_path 'data/Packungen-2019.01.31.xlsx',  File.dirname(__FILE__)
+      this_month = File.expand_path 'data/Packungen-2019.03.06.xlsx',  File.dirname(__FILE__)
       expected =  {"00277"=>[:name_base, :expiry_date, :production_science],
-        "15219"=>[:new],
+        "15219"=>[:expiry_date, :indication_registration, :indication_sequence, :sequence],
         "16105"=>[:new],
         "16598"=>[:new],
         "28486"=>[:new],
@@ -85,8 +86,7 @@ module ODDB
         "00279"=>[:delete],
         "65837"=>[:delete],
         "65838"=>[:delete]
-      }
-
+                }
       result = @diff.diff this_month, last_month
       assert_equal(expected, result.changes)
     end

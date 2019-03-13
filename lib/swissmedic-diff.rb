@@ -23,6 +23,9 @@ require File.join(File.dirname(__FILE__), 'compatibility.rb')
 #License::   GPLv2.0 Compliance
 #Source::    http://scm.ywesee.com/?p=swissmedic-diff/.git;a=summary
 class SwissmedicDiff
+    VALUE_UNLIMITED = nil
+    REGEXP_UNLIMITED = /unbegrenzt/i
+
   module Diff
     COLUMNS_2014 = {
         :iksnr => /Zulassungs-Nummer/i,                # column-nr: 0
@@ -350,7 +353,11 @@ class SwissmedicDiff
       if cell = row[idx]
         case key
         when :registration_date, :expiry_date
-          row[idx] && row[idx].value ? row[idx].value.to_date : nil
+          if  row[idx] && row[idx].value && REGEXP_UNLIMITED.match(row[idx].value.to_s)
+            VALUE_UNLIMITED # Date.new(2099,12,31)
+          else
+            row[idx] && row[idx].value ? row[idx].value.to_date : nil
+          end
         when :seqnr
           sprintf "%02i", cell(row, idx).to_i
         else
