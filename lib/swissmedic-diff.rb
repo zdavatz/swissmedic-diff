@@ -155,7 +155,11 @@ class SwissmedicDiff
         sprintf "%s (%s)", txt, pairs.join(',')
       when :registration_date, :expiry_date
         row = diff.newest_rows[iksnr].sort.first.last
-        sprintf "%s (%s)", txt, row[COLUMNS_2014.keys.index(flag)].value.strftime('%d.%m.%Y')
+        if row[COLUMNS_2014.keys.index(flag)].value.to_s.match(REGEXP_UNLIMITED)
+          sprintf "%s (%s)", txt, 'unbegrenzt'
+        else
+          sprintf "%s (%s)", txt, row[COLUMNS_2014.keys.index(flag)].value.strftime('%d.%m.%Y')
+        end
       else
         row = diff.newest_rows[iksnr].sort.first.last
         sprintf "%s (%s)", txt, cell(row, COLUMNS_2014.keys.index(flag))
