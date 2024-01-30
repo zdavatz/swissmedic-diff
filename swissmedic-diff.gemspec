@@ -24,4 +24,6 @@ spec = Gem::Specification.new do |s|
    s.add_development_dependency "minitest-reporters"
 
    s.homepage	 = "https://github.com/zdavatz/swissmedic-diff"
+   s.metadata["changelog_uri"] = s.homepage + "/blob/master/History.md"
+
 end
