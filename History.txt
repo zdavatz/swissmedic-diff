@@ -1,3 +1,8 @@
+=== 0.2.9 / 07.01.2025
+
+* Eliminated warning because of frozen string under Ruby 3.4
+* Added devenv environment for Ruby 3.4 (see https://devenv.sh/)
+
 === 0.2.8 / 04.10.2023
 
 * Fix problem when expiration_date is a string 'Unbegrenzt'
