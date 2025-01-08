@@ -326,12 +326,12 @@ class SwissmedicDiff
         _sort_by(sort, iksnr, flags)
       }.collect { |iksnr, flags|
         if(flags.include? :new)
-          "+ " << describe(@diff, iksnr)
+          "+ " + describe(@diff, iksnr)
         elsif(flags.include? :delete)
-          "- " << describe(@diff, iksnr)
+          "- " + describe(@diff, iksnr)
         else
-          "> " << describe(@diff, iksnr) << "; " \
-            << flags.collect { |flag| describe_flag(@diff, iksnr, flag)
+          "> " + describe(@diff, iksnr) << "; " \
+            + flags.collect { |flag| describe_flag(@diff, iksnr, flag)
           }.compact.join(", ")
         end
       }.join("\n")

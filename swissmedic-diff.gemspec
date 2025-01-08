@@ -19,9 +19,13 @@ spec = Gem::Specification.new do |s|
    s.add_dependency('nokogiri')
    s.add_dependency('rubyzip')
    s.add_dependency('spreadsheet')
+   s.add_dependency('logger')
+   s.add_dependency('ostruct')
    s.add_development_dependency "rake"
    s.add_development_dependency "minitest"
    s.add_development_dependency "minitest-reporters"
 
    s.homepage	 = "https://github.com/zdavatz/swissmedic-diff"
+   s.metadata["changelog_uri"] = s.homepage + "/blob/master/History.md"
+
 end
