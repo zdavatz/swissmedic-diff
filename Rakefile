@@ -1,7 +1,7 @@
 # -*- ruby -*-
 
-require 'rubygems'
+require "rubygems"
 require "bundler/gem_tasks"
 
-require 'rake/clean'
-CLEAN.include FileList['*.log']
+require "rake/clean"
+CLEAN.include FileList["*.log"]

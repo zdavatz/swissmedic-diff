@@ -4,6 +4,8 @@
 * Use standardrb to format the code
 * Added minimal ruby-version and license to gemspec
 * Removed testing and code for Swissmedic-Packages older than 2019
+* Remove obsolete file setup.rb
+* Replaced pry by debug
 
 # 0.2.9 / 07.01.2025
 
