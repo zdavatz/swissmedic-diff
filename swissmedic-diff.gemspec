@@ -8,6 +8,8 @@ spec = Gem::Specification.new do |s|
    s.author      = "Hannes Wyss, Masaomi Hatakeyama"
    s.email       = "hwyss@ywesee.com, mhatakeyama@ywesee.com"
    s.platform    = Gem::Platform::RUBY
+   s.license     = "GNU GPL version 2"
+   s.required_ruby_version = '>= 2.0'
    s.files       = Dir.glob('lib/*.rb') +
                    Dir.glob('bin/*') +
                    Dir.glob('[A-Z]*') +
@@ -15,13 +17,14 @@ spec = Gem::Specification.new do |s|
                    Dir.glob('test/data/*.xls')
    s.test_file   = "test/test_swissmedic-diff.rb"
    s.executables << 'swissmedic-diff'
-   s.add_dependency('rubyXL', '>= 3.3.1')
+   s.add_dependency('simple_xlsx_reader')
    s.add_dependency('nokogiri')
    s.add_dependency('rubyzip')
-   s.add_dependency('spreadsheet')
    s.add_dependency('logger')
    s.add_dependency('ostruct')
    s.add_development_dependency "rake"
+   s.add_development_dependency "standard"
+   s.add_development_dependency "debug"
    s.add_development_dependency "minitest"
    s.add_development_dependency "minitest-reporters"
 

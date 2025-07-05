@@ -1,15 +1,11 @@
 #!/usr/bin/env ruby
-# encoding: utf-8
 # SwissmedicDiff -- swissmedic-diff -- 27.03.2008 -- hwyss@ywesee.com
 
 require 'ostruct'
-require 'spreadsheet'
-require 'rubyXL'
+require 'simple_xlsx_reader'
 require 'pp'
 require File.join(File.dirname(__FILE__), 'version.rb')
 
-# add some monkey patches for Spreadsheet and rubyXL
-require File.join(File.dirname(__FILE__), 'compatibility.rb')
 
 #= diff command (compare two xls fles) for swissmedic xls file.
 #
@@ -27,59 +23,11 @@ class SwissmedicDiff
     REGEXP_UNLIMITED = /unbegrenzt/i
 
   module Diff
-    COLUMNS_2014 = {
-        :iksnr => /Zulassungs-Nummer/i,                # column-nr: 0
-        :seqnr => /Dosistärke-nummer|^Sequenz$/i,
-        :name_base => /Präparatebezeichnung|^Sequenzname$/i,
-        :company => /Zulassungsinhaberin/i,
-        :index_therapeuticus => /IT-Nummer/i,
-        :atc_class => /ATC-Code/i,                     # column-nr: 5
-        :production_science => /Heilmittelcode/i,
-        :registration_date => /Erstzul.datum Präp./i,
-        :sequence_date => /Zul.datum Dosisstärke *|Zul.datum Sequenz/i,
-        :expiry_date => /Gültigkeits-datum */i,
-        :ikscd => /Verpackungs ID/i,                   # column-nr: 10
-        :size => /Packungsgrösse/i,
-        :unit => /Einheit/i,
-        :ikscat => /Abgabekategorie/i,
-        :substances => /Wirkstoff/i,
-        :composition => /Zusammensetzung/i,             # column-nr: 15
-        :indication_registration => /Anwendungsgebiet Präparate/i,
-        :indication_sequence => /Anwendungsgebiet Dosisstärke|Anwendungsgebiet Sequenz/i,
-    }
-
     COLUMNS_OLD = [ :iksnr, :seqnr, :name_base, :company,
                 :index_therapeuticus, :atc_class, :production_science,
                 :registration_date, :sequence_date, :expiry_date, :ikscd,
                 :size, :unit, :ikscat, :substances, :composition,
                 :indication_registration, :indication_sequence ]
-
-    COLUMNS_JULY_2015 = {
-        :iksnr => /Zulassungs-Nummer/i,                  # column-nr: 0
-        :seqnr => /Dosis+tärke-nummer/i,
-        :name_base => /Präparatebezeichnung/i,
-        :company => /Zulassungsinhaberin/i,
-        :production_science => /Heilmittelcode/i,
-        :index_therapeuticus => /IT-Nummer/i,            # column-nr: 5
-        :atc_class => /ATC-Code/i,
-        :registration_date => /Erstzulassungs-datum./i,
-        :sequence_date => /Zul.datum Dosisstärke/i,
-        :expiry_date => /Gültigkeitsdauer der Zulassung/i,
-        :ikscd => /Packungscode/i,                 # column-nr: 10
-        :size => /Packungsgrösse/i,
-        :unit => /Einheit/i,
-        :ikscat => /Abgabekategorie Packung/i,
-        :ikscat_seq => /Abgabekategorie Dosisstärke/i,
-        :ikscat_preparation => /Abgabekategorie Präparat/i, # column-nr: 15
-        :substances => /Wirkstoff/i,
-        :composition => /Zusammensetzung/i,
-        :indication_registration => /Anwendungsgebiet Präparat/i,
-        :indication_sequence => /Anwendungsgebiet Dosisstärke/i,
-        :gen_production => /Gentechnisch hergestellte Wirkstoffe/i, # column-nr 20
-        :insulin_category => /Kategorie bei Insulinen/i,
-      # swissmedi corrected in february 2018 the typo  betäubunsmittel to  betäubungsmittel-
-        :drug_index       => /Verz. bei betäubun.*smittel-haltigen Präparaten/i,
-    }
 
     COLUMNS_FEBRUARY_2019= {
       :iksnr => /Zulassungs-Nummer/i,                  # column-nr: 0
@@ -155,10 +103,10 @@ class SwissmedicDiff
         sprintf "%s (%s)", txt, pairs.join(',')
       when :registration_date, :expiry_date
         row = diff.newest_rows[iksnr].sort.first.last
-        if row[COLUMNS_2014.keys.index(flag)].value.to_s.match(REGEXP_UNLIMITED)
+        if row[COLUMNS_2014.keys.index(flag)].to_s.match(REGEXP_UNLIMITED)
           sprintf "%s (%s)", txt, 'unbegrenzt'
         else
-          sprintf "%s (%s)", txt, row[COLUMNS_2014.keys.index(flag)].value.strftime('%d.%m.%Y')
+          sprintf "%s (%s)", txt, row[COLUMNS_2014.keys.index(flag)].strftime('%d.%m.%Y')
         end
       else
         row = diff.newest_rows[iksnr].sort.first.last
@@ -181,13 +129,13 @@ class SwissmedicDiff
       @diff.updates = updates = []
       @diff.changes = changes = {}
       @diff.newest_rows = newest_rows
-      Spreadsheet.client_encoding = 'UTF-8'
-      tbook = Spreadsheet.open(target)
+      t_rows = SimpleXlsxReader.open(target).sheets.first.rows.slurp
       idx, prr, prp = nil
       multiples = {}
-      @latest_keys = get_column_indices(Spreadsheet.open(latest)).keys
-      @target_keys = get_column_indices(tbook).keys
-      each_valid_row(tbook) { |row|
+      l_rows = SimpleXlsxReader.open(latest).sheets.first.rows.slurp
+      @latest_keys = get_column_indices(l_rows).keys
+      @target_keys = get_column_indices(t_rows).keys
+      each_valid_row(t_rows) { |row|
         iksnr = cell(row, @target_keys.index(:iksnr))
         seqnr = cell(row, @target_keys.index(:seqnr))
         pacnr = cell(row, @target_keys.index(:ikscd))
@@ -261,11 +209,13 @@ class SwissmedicDiff
       [known_regs, known_seqs, known_pacs, newest_rows]
     end
     def _known_data(latest, known_regs, known_seqs, known_pacs, newest_rows)
-      lbook = Spreadsheet.open(latest)
-      @latest_keys = get_column_indices(lbook).keys
+      sheet = SimpleXlsxReader.open(latest).sheets.first
+      rows = sheet.rows.slurp
+      @latest_keys = get_column_indices(rows).keys
       idx, prr, prp = nil
       multiples = {}
-      each_valid_row(lbook) { |row|
+
+      each_valid_row(rows) { |row|
         iksnr = cell(row, @latest_keys.index(:iksnr))
         seqnr = cell(row, @latest_keys.index(:seqnr))
         pacnr = cell(row, @latest_keys.index(:ikscd))
@@ -357,10 +307,10 @@ class SwissmedicDiff
       if cell = row[idx]
         case key
         when :registration_date, :expiry_date
-          if  row[idx] && row[idx].value && REGEXP_UNLIMITED.match(row[idx].value.to_s)
+          if  row[idx] && row[idx] && REGEXP_UNLIMITED.match(row[idx].to_s)
             VALUE_UNLIMITED # Date.new(2099,12,31)
           else
-            row[idx] && row[idx].value ? row[idx].value.to_date : nil
+            row[idx]
           end
         when :seqnr
           sprintf "%02i", cell(row, idx).to_i
@@ -370,66 +320,20 @@ class SwissmedicDiff
       end
     end
 
-    def get_column_indices(spreadsheet)
-      error_2014 = nil
-      filename = spreadsheet.root.respond_to?(:filepath) ? spreadsheet.root.filepath : 'unknown'
-      headerRowId = rows_to_skip(spreadsheet)-1
-      row = spreadsheet.worksheet(0)[headerRowId]
-
-      COLUMNS_2014.each{
+    def get_column_indices(rows)
+      headerRowId = rows_to_skip(rows)-1
+      row = rows[headerRowId]
+      row = rows[5] # Headers are found at row 5 since February 5
+      0.upto((COLUMNS_FEBRUARY_2019.size) -1).each{ |idx| puts "#{idx}: #{row[idx]}" }  if $VERBOSE
+      COLUMNS_FEBRUARY_2019.each{
         |key, value|
-        header_name = row[COLUMNS_2014.keys.index(key)].value
+        header_name = row[COLUMNS_FEBRUARY_2019.keys.index(key)].to_s
         unless value.match(header_name)
-          puts "#{__LINE__}: #{key} ->  #{COLUMNS_2014.keys.index(key)} #{value}\nbut was  #{header_name}" if $VERBOSE
-          error_2014 = "#{filename}_has_unexpected_column_#{COLUMNS_2014.keys.index(key)}_#{key}_#{value.to_s}_but_was_#{header_name}"
-          break
+          puts "#{__LINE__}: #{key} ->  #{COLUMNS_FEBRUARY_2019.keys.index(key)} #{value}\nbut was  #{header_name}" if $VERBOSE
+          error_2019 = "Packungen.xlslx_has_unexpected_column_#{COLUMNS_FEBRUARY_2019.keys.index(key)}_#{key}_#{value.to_s}_but_was_#{header_name}"
+        break
         end
       }
-      return COLUMNS_2014 unless error_2014
-      error_2015 = nil
-      COLUMNS_JULY_2015.each{
-        |key, value|
-        header_name = row[COLUMNS_JULY_2015.keys.index(key)].value
-        unless value.match(header_name)
-          puts "#{__LINE__}: #{key} ->  #{COLUMNS_JULY_2015.keys.index(key)} #{value}\nbut was  #{header_name}" if $VERBOSE
-          error_2015 = "#{filename}_has_unexpected_column_#{COLUMNS_JULY_2015.keys.index(key)}_#{key}_#{value.to_s}_but_was_#{header_name}"
-          break
-        end
-      }
-      unless error_2015
-        idx14 = COLUMNS_2014.keys.index(:name_base)
-        idx15 = COLUMNS_2014.keys.index(:name_base)
-        if (idx14 != idx15)
-          raise ":name_base must be same index in COLUMNS_JULY_2015 and COLUMNS_2014. Is #{idx14} and #{idx15}"
-        end
-        return COLUMNS_JULY_2015
-      end
-      row = spreadsheet.worksheet(0)[5] # Headers are found at row 5 since February 5
-      error_2019 = nil
-      if spreadsheet.worksheet(0)[5].size != COLUMNS_FEBRUARY_2019.size
-        raise "#{error_2015}\n#{error_2014}"
-      else
-        0.upto((COLUMNS_FEBRUARY_2019.size) -1).each{ |idx| puts "#{idx}: #{row[idx].value}" }  if $VERBOSE
-        COLUMNS_FEBRUARY_2019.each{
-          |key, value|
-          header_name = row[COLUMNS_FEBRUARY_2019.keys.index(key)].value.to_s
-          unless value.match(header_name)
-            puts "#{__LINE__}: #{key} ->  #{COLUMNS_FEBRUARY_2019.keys.index(key)} #{value}\nbut was  #{header_name}" if $VERBOSE
-            error_2019 = "Packungen.xlslx_has_unexpected_column_#{COLUMNS_FEBRUARY_2019.keys.index(key)}_#{key}_#{value.to_s}_but_was_#{header_name}"
-            require 'pry'; binding.pry
-          break
-          end
-        }
-        unless error_2015
-          idx14 = COLUMNS_2014.keys.index(:name_base)
-          idx15 = COLUMNS_2014.keys.index(:name_base)
-          if (idx14 != idx15)
-            raise ":name_base must be same index in COLUMNS_JULY_2015 and COLUMNS_2014. Is #{idx14} and #{idx15}"
-          end
-          return COLUMNS_FEBRUARY_2019
-        end
-        raise "#{error_2019}" if error_2019
-     end
      COLUMNS_FEBRUARY_2019
     end
     #=== iterate over all valid rows of a swissmedic Packungen.xls
@@ -442,15 +346,14 @@ class SwissmedicDiff
     # example:
     #   SwissmedicDiff.new.each_valid_row(Spreadsheet.open('path/to/file')) { |x| puts "iksnr #{x[0]}" }
     #
-    #_spreadsheet_:: spreadsheet to operate on
+    # rows:: rows to operate on
     #
     #return  ::
-    def each_valid_row(spreadsheet)
-      skipRows = rows_to_skip(spreadsheet)
-      column_keys = get_column_indices(spreadsheet).keys
-      worksheet = spreadsheet.worksheet(0)
+    def each_valid_row(rows)
+      skipRows = rows_to_skip(rows)
+      column_keys = get_column_indices(rows).keys
       row_nr = 0
-      worksheet.each() {
+      rows.each() {
         |row|
         row_nr += 1
         next if row_nr <= skipRows
@@ -467,13 +370,10 @@ class SwissmedicDiff
       }
     end
 
-    def rows_to_skip(spreadsheet)
-      # Packungen.xls of swissmedic before October 2013 had  3 leading rows
-      # Packungen.xls of swissmedic after  October 2013 have 4 leading rows
+    def rows_to_skip(rows)
       j = 0
       while true
-        cell = spreadsheet.worksheet(0).row(j)[0]
-        cell = cell.value if cell.is_a?(RubyXL::Cell)
+        cell = rows[j][0]
         break if cell.respond_to?(:to_i) and cell.to_i != 0
         j += 1
       end
