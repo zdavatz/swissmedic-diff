@@ -1,8 +1,8 @@
-= swissmedic-diff
+# swissmedic-diff
 
 * https://github.com/zdavatz/swissmedic-diff
 
-== DESCRIPTION:
+## DESCRIPTION:
 
 * Compares two Excel Documents provided by Swissmedic and displays the
 salient differences. Also: Find out what Products have changed on the
@@ -13,7 +13,7 @@ Up-To-Date file:
 * http://www.swissmedic.ch//daten/00080/00251/index.html
 
 
-== FEATURES/PROBLEMS:
+## FEATURES/PROBLEMS:
 
 Swissmedic does not store old files. You must do this on your own.
 
@@ -27,12 +27,12 @@ directory as follows:
 
 Then you can get the version 0.1.2.
 
-== REQUIREMENTS:
+## REQUIREMENTS:
 
 * ruby 1.9, ruby 2.x
 * spreadsheet
 
-== INSTALL:
+## INSTALL:
 
 The easiest way to install is via RubyGems. On the command line enter:
 
@@ -49,7 +49,7 @@ See test directory for tests. Run
 
 for testing.
 
-== USAGE:
+## USAGE:
 
 Usage: /usr/bin/swissmedic-diff [-gnr] <file1> <file2> [<output>]
 
@@ -57,13 +57,13 @@ Usage: /usr/bin/swissmedic-diff [-gnr] <file1> <file2> [<output>]
   -n --name          sort by name
   -r --registration  sort by registration
 
-== DEVELOPERS:
+## DEVELOPERS:
 
   * Hannes Wyss <hwyss@ywesee.com>
   * Masaomi Hatakeyama <mhatakeyama@ywesee.com>
   * Zeno R.R. Davatz <zdavatz@ywesee.com>
   * Niklaus Giger <ngiger@ywesee.com>
 
-== LICENSE:
+## LICENSE:
 
   * GPLv2
