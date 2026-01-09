@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email = "hwyss@ywesee.com, mhatakeyama@ywesee.com"
   s.platform = Gem::Platform::RUBY
   s.license = "GNU GPL version 2"
-  s.required_ruby_version = ">= 2.0"
+  s.required_ruby_version = ">= 2.6"
   s.files = Dir.glob("lib/*.rb") +
     Dir.glob("bin/*") +
     Dir.glob("[A-Z]*") +
