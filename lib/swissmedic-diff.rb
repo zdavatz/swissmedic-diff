@@ -75,7 +75,6 @@ class SwissmedicDiff
       production_science: "Heilmittelcode",
       atc_class: "ATC-Code"
     }
-    GALFORM_P = %r{excipiens\s+(ad|pro)\s+(?<galform>((?!\bpro\b)[^.])+)}
     DATE_FORMAT = "%Y:%m:%d"
 
     def capitalize(string)
@@ -96,6 +95,7 @@ class SwissmedicDiff
       txt = FLAGS.fetch(flag, flag)
       case flag
       when :sequence
+        txt
       when :replaced_package
         pairs = diff.newest_rows[iksnr].collect { |rep, row|
           if (old = diff.replacements[row])
@@ -104,15 +104,15 @@ class SwissmedicDiff
         }.compact
         sprintf "%s (%s)", txt, pairs.join(",")
       when :registration_date, :expiry_date
-        row = diff.newest_rows[iksnr].sort.first.last
-        if row[COLUMNS_2014.keys.index(flag)].to_s.match(REGEXP_UNLIMITED)
+        row = diff.newest_rows[iksnr].min.last
+        if row[COLUMNS_FEBRUARY_2019.keys.index(flag)].to_s.match(REGEXP_UNLIMITED)
           sprintf "%s (%s)", txt, "unbegrenzt"
         else
-          sprintf "%s (%s)", txt, row[COLUMNS_2014.keys.index(flag)].strftime("%d.%m.%Y")
+          sprintf "%s (%s)", txt, row[COLUMNS_FEBRUARY_2019.keys.index(flag)].strftime("%d.%m.%Y")
         end
       else
-        row = diff.newest_rows[iksnr].sort.first.last
-        sprintf "%s (%s)", txt, cell(row, COLUMNS_2014.keys.index(flag))
+        row = diff.newest_rows[iksnr].min.last
+        sprintf "%s (%s)", txt, cell(row, COLUMNS_FEBRUARY_2019.keys.index(flag))
       end
     end
 
@@ -144,7 +144,7 @@ class SwissmedicDiff
         multiples[iksnr] ||= {}
         if prr == iksnr && prp == pacnr
           idx += 1
-        elsif previous = multiples[iksnr][pacnr]
+        elsif (previous = multiples[iksnr][pacnr])
           prr = iksnr
           prp = pacnr
           idx = previous[@target_keys.size].to_i + 1
@@ -194,7 +194,15 @@ class SwissmedicDiff
       }
       @diff.sequence_deletions = known_seqs.keys
       @diff.registration_deletions = known_regs.keys
+      @@stat = {}
+      @@stat[:target] = "#{File.basename(target)} #{File.size(target)} bytes"
+      @@stat[:latest] = "#{File.basename(latest)} #{File.size(latest)} bytes"
+      @diff.to_h.keys.each { |name| @diff.instance_eval("@@stat[:#{name}] = #{name}.size", __FILE__, __LINE__) }
       @diff
+    end
+
+    def SwissmedicDiff.stat
+      @@stat
     end
 
     def format_flags(flags)
@@ -227,7 +235,7 @@ class SwissmedicDiff
         multiples[iksnr] ||= {}
         if prr == iksnr && prp == pacnr
           idx += 1
-        elsif previous = multiples[iksnr][pacnr]
+        elsif (previous = multiples[iksnr][pacnr])
           prr = iksnr
           prp = pacnr
           idx = previous[@latest_keys.size].to_i + 1
@@ -247,8 +255,8 @@ class SwissmedicDiff
 
     def name(diff, iksnr)
       rows = diff.newest_rows[iksnr]
-      row = rows.sort.first.last
-      cell(row, COLUMNS_2014.keys.index(:name_base))
+      row = rows.min.last
+      cell(row, COLUMNS_FEBRUARY_2019.keys.index(:name_base))
     end
 
     def rows_diff(row, other, ignore = [])
@@ -316,7 +324,7 @@ class SwissmedicDiff
       if row[idx]
         case key
         when :registration_date, :expiry_date
-          if row[idx] && row[idx] && REGEXP_UNLIMITED.match(row[idx].to_s)
+          if row[idx] && REGEXP_UNLIMITED.match(row[idx].to_s)
             VALUE_UNLIMITED # Date.new(2099,12,31)
           else
             row[idx]
@@ -330,8 +338,8 @@ class SwissmedicDiff
     end
 
     def get_column_indices(rows)
-      headerRowId = rows_to_skip(rows) - 1
-      rows[headerRowId]
+      header_row_id = rows_to_skip(rows) - 1
+      rows[header_row_id]
       row = rows[5] # Headers are found at row 5 since February 5
       0.upto(COLUMNS_FEBRUARY_2019.size - 1).each { |idx| puts "#{idx}: #{row[idx]}" } if $VERBOSE
       COLUMNS_FEBRUARY_2019.each { |key, value|
@@ -358,12 +366,12 @@ class SwissmedicDiff
     #
     # return  ::
     def each_valid_row(rows)
-      skipRows = rows_to_skip(rows)
+      skip_rows = rows_to_skip(rows)
       column_keys = get_column_indices(rows).keys
       row_nr = 0
       rows.each { |row|
         row_nr += 1
-        next if row_nr <= skipRows
+        next if row_nr <= skip_rows
         break unless row
         if row.size < column_keys.size / 2
           $stdout.puts "Data missing in \n(line " + row_nr.to_s + "): " + row.join(", ").to_s + "\n"
@@ -379,9 +387,9 @@ class SwissmedicDiff
 
     def rows_to_skip(rows)
       j = 0
-      while true
+      loop do
         cell = rows[j][0]
-        break if cell.respond_to?(:to_i) and cell.to_i != 0
+        break if cell.respond_to?(:to_i) && cell.to_i != 0
         j += 1
       end
       j

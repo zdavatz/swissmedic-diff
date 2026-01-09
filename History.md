@@ -1,3 +1,11 @@
+# 0.3.1 / 09.01.2026
+* Ruby 4.0 to tests
+* Added stat method to show the result of the diff
+* Fixes for running bundle exec ruby bin/swissmedic-diff
+* Use standardrb to format the code
+* Removed unused constant GALFORM_P
+* Requires at least Ruby 2.6
+
 # 0.3.0 / 05.07.2025
 
 * Use simple_xlsx_reader insted of RubyXL to speed up comparision

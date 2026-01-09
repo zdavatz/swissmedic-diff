@@ -17,7 +17,7 @@
   # languages.nix.enable = true;
 
   languages.ruby.enable = true;
-  languages.ruby.version = "3.4";
+  languages.ruby.version = "4.0";
   # https://devenv.sh/pre-commit-hooks/
   # pre-commit.hooks.shellcheck.enable = true;
 

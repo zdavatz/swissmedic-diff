@@ -14,6 +14,28 @@ module ODDB
       @diff = SwissmedicDiff.new
     end
 
+    def test_diff_changes_january_2026
+      start_time = Time.now
+      @diff = SwissmedicDiff.new
+      last_month = File.expand_path "data/Packungen-2025.12.15.xlsx", File.dirname(__FILE__)
+      this_month = File.expand_path "data/Packungen-2026.01.08.xlsx", File.dirname(__FILE__)
+      result = @diff.diff this_month, last_month
+      duration = (Time.now - start_time).to_i
+      puts "Took #{duration} seconds"
+      assert_equal(487, result.updates.size)
+      assert_equal(336, result.changes.size)
+      assert_equal(148, result.news.size)
+      assert_equal(7, result.replacements.size)
+      assert_equal(107, result.package_deletions.size)
+
+      assert_equal(["16105", "01", "Hirudoid, Creme", "Medinova AG", "Synthetika", "02.08.2.", "C05BA01", Date.new(1951, 9, 1), Date.new(1951, 9, 1), "unbegrenzt", "001", "14", "g", "D", "D", "D", "heparinoidum (chondroitini polysulfas)", "heparinoidum (chondroitini polysulfas) 3 mg, corresp. 250 U., glycerolum (85 per centum), acidum stearicum, alcoholes adipis lanae, alcohol cetylicus et stearylicus 31.375 mg, vaselinum album, alcohol myristylicus, alcohol isopropylicus, kalii hydroxidum, E 218 1.6 mg, thymolum, propylis parahydroxybenzoas 0.4 mg, aqua purificata, ad unguentum pro 1 g.", "X", "Venenmittel für den äusserlichen Gebrauch", nil, nil, nil, nil, 0], result.news.first)
+
+      assert_equal([["55249", "01", "Bronchosan Husten, Tropfen zum Einnehmen", "A.Vogel AG", "Phytoarzneimittel", "03.02.0.", "R05CA10", Date.new(2000, 10, 18), Date.new(2000, 10, 18), "unbegrenzt", "001", "50", "ml", "D", "D", "D", "hederae helicis herbae recentis tinctura (Hedera helix L., herba), thymi herbae recentis tinctura (Thymus vulgaris L., herba), liquiritiae radicis tinctura (Glycyrrhiza glabra L., radix)", "hederae helicis herbae recentis tinctura (Hedera helix L., herba) 376.1 mg, ratio: 1:5.6, Auszugsmittel ethanolum 50.6% (V/V), thymi herbae recentis tinctura (Thymus vulgaris L., herba) 329.1 mg, ratio: 1:7.9, Auszugsmittel ethanolum 50.6% (V/V), liquiritiae radicis tinctura (Glycyrrhiza glabra L., radix) 233.9 mg, ratio: 1:10, Auszugsmittel ethanolum 50.6% (V/V), anisi stellati aetheroleum, eucalypti aetheroleum, ad solutionem pro 1 ml, corresp. ethanolum 51 % V/V.", "X", "Bei Erkältungshusten", nil, nil, nil, nil, 0], "052"], result.replacements.first)
+
+      assert_equal(["00613", [:expiry_date]], result.changes.first)
+      assert_equal({target: "Packungen-2026.01.08.xlsx 3198082 bytes", latest: "Packungen-2025.12.15.xlsx 3218271 bytes",  news: 148, updates: 487, changes: 336, newest_rows: 6305, replacements: 147, package_deletions: 107, sequence_deletions: 60, registration_deletions: 47}, SwissmedicDiff.stat)
+    end
+
     def test_diff_changes_february_2019
       @diff = SwissmedicDiff.new
       last_month = File.expand_path "data/Packungen-2019.03.06.xlsx", File.dirname(__FILE__)
@@ -61,6 +83,7 @@ module ODDB
 
       result = @diff.diff this_month, last_month
       assert_equal(expected, result.changes)
+      assert_equal({target: "Packungen-2025.07.01.xlsx 245310 bytes", latest: "Packungen-2019.03.06.xlsx 347989 bytes", news: 41, updates: 2, changes: 40, newest_rows: 40, replacements: 9, package_deletions: 39, sequence_deletions: 34, registration_deletions: 32}, SwissmedicDiff.stat)
     end
   end
 end
